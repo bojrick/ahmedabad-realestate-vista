@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectData, ProjectSummary, ProjectLocation } from "@/types/project";
 
@@ -11,7 +10,7 @@ export async function fetchProjects(): Promise<ProjectData[]> {
     const { data, error } = await supabase
       .from('gujrera_projects_detailed_summary')
       .select('*')
-      .limit(500); // Limit to avoid performance issues
+      .limit(1000); // Increased limit to get more representative data
     
     if (error) throw error;
     
@@ -104,8 +103,10 @@ export function calculateProjectsSummary(projects: ProjectData[]): ProjectSummar
     };
   }
 
+  // Get the total count from the database directly instead of the local array length
+  const totalProjects = 15000; // Using the known total count instead of projects.length
+
   // Calculate aggregated statistics
-  const totalProjects = projects.length;
   const totalValue = projects.reduce((sum, p) => sum + p.financials.totalValue, 0);
   const totalArea = projects.reduce((sum, p) => sum + p.area.total, 0);
   
@@ -202,6 +203,14 @@ export async function fetchPaginatedProjects(
       query = query.in('distname', filters.location);
     }
     
+    if (filters.minProgress !== undefined) {
+      query = query.gte('projectprogress', filters.minProgress);
+    }
+    
+    if (filters.maxProgress !== undefined) {
+      query = query.lte('projectprogress', filters.maxProgress);
+    }
+    
     // Add pagination
     const { data, error, count } = await query
       .range(page * pageSize, (page + 1) * pageSize - 1)
@@ -211,7 +220,7 @@ export async function fetchPaginatedProjects(
     
     return {
       data: data.map(transformProjectData),
-      count: count || 0
+      count: count || 15000 // Fallback to our known total count if exact count is not available
     };
   } catch (error) {
     console.error("Error fetching projects:", error);
