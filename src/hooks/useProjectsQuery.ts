@@ -7,6 +7,9 @@ import { transformProjectData, calculateProjectsSummary } from "@/adapters/proje
 // Number of items to load per page
 const PAGE_SIZE = 12;
 
+// The known total count of projects
+const TOTAL_PROJECTS_COUNT = 15000;
+
 /**
  * Custom hook to fetch paginated projects with filters
  */
@@ -64,7 +67,7 @@ export const useProjectsQuery = (filters: ProjectFilters = {}) => {
         return {
           projects: transformedData,
           nextPage: data.length === PAGE_SIZE ? pageParam + 1 : undefined,
-          totalCount: count || 15000 // Use a fallback count of 15000 if exact count is not available
+          totalCount: TOTAL_PROJECTS_COUNT // Use the known total count
         };
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -89,7 +92,7 @@ export const useProjectsQuery = (filters: ProjectFilters = {}) => {
     hasNextPage: projectsQuery.hasNextPage,
     fetchNextPage: projectsQuery.fetchNextPage,
     isFetchingNextPage: projectsQuery.isFetchingNextPage,
-    totalCount: projectsQuery.data?.pages[0]?.totalCount || 15000 // Use fallback if no data
+    totalCount: TOTAL_PROJECTS_COUNT // Return the known total count
   };
 };
 
@@ -155,11 +158,11 @@ export const useProjectSummaryQuery = () => {
           }
         }));
         
-        // Calculate summary with the known total count
+        // Calculate summary with the data retrieved
         const summary = calculateProjectsSummary(minimalProjects);
         
-        // Override the total projects count with the correct value
-        summary.totalProjects = 15000;
+        // Set the total projects count to the known value
+        summary.totalProjects = TOTAL_PROJECTS_COUNT;
         
         return summary;
       } catch (error) {

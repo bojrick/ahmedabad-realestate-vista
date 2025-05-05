@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProjectSummaryQuery } from "@/hooks/useProjectsQuery";
@@ -49,14 +50,13 @@ const Index = () => {
           </TabsContent>
           
           <TabsContent value="projects" className="pt-6">
-            {/* We'll show a minimal version here, user can go to Projects page for full features */}
             <div className="mb-4">
               <p className="text-sm text-muted-foreground">
                 Showing recent projects. Visit the <a href="/projects" className="text-blue-600 hover:underline">Projects Explorer</a> for more filtering and pagination options.
               </p>
             </div>
             
-            {/* We omit filtering and pagination controls here to keep it simple */}
+            <ProjectList />
           </TabsContent>
         </Tabs>
       </main>

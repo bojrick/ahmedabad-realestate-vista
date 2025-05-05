@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -50,9 +51,6 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ summary, loading 
     );
   }
 
-  // Display the correct number of total projects (15k)
-  const displayTotalProjects = summary.totalProjects || 15000;
-
   return (
     <div className="space-y-6">
       <div>
@@ -67,7 +65,7 @@ const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ summary, loading 
             <Database className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{displayTotalProjects.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{summary.totalProjects.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
               Registered real estate projects
             </p>

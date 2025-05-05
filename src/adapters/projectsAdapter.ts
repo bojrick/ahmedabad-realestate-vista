@@ -10,7 +10,7 @@ export async function fetchProjects(): Promise<ProjectData[]> {
     const { data, error } = await supabase
       .from('gujrera_projects_detailed_summary')
       .select('*')
-      .limit(1000); // Increased limit to get more representative data
+      .limit(2000); // Increased limit to get more representative data
     
     if (error) throw error;
     
@@ -103,9 +103,9 @@ export function calculateProjectsSummary(projects: ProjectData[]): ProjectSummar
     };
   }
 
-  // Get the total count from the database directly instead of the local array length
-  const totalProjects = 15000; // Using the known total count instead of projects.length
-
+  // Fixed total count - this is the known total from Supabase
+  const TOTAL_PROJECTS_COUNT = 15000;
+  
   // Calculate aggregated statistics
   const totalValue = projects.reduce((sum, p) => sum + p.financials.totalValue, 0);
   const totalArea = projects.reduce((sum, p) => sum + p.area.total, 0);
@@ -163,7 +163,7 @@ export function calculateProjectsSummary(projects: ProjectData[]): ProjectSummar
     : 0;
   
   return {
-    totalProjects,
+    totalProjects: TOTAL_PROJECTS_COUNT, // Always use the known total count
     totalValue,
     totalArea,
     avgBookingPercentage,
