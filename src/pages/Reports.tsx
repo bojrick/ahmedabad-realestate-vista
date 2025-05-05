@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -8,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useProjectData } from "@/hooks/useProjectData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileChart, BarChart, PieChart, Table, Download } from "lucide-react";
+import { FileText, BarChart, PieChart, Table, Download } from "lucide-react";
 
 const Reports = () => {
   const { allProjects, loading } = useProjectData();
@@ -69,7 +68,7 @@ const Reports = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <FileChart className="mr-2 h-5 w-5" />
+                <FileText className="mr-2 h-5 w-5" />
                 Report Builder
               </CardTitle>
             </CardHeader>
@@ -133,7 +132,7 @@ const Reports = () => {
               </div>
               
               <Button className="w-full">
-                <FileChart className="mr-2 h-4 w-4" />
+                <FileText className="mr-2 h-4 w-4" />
                 Generate Report
               </Button>
               

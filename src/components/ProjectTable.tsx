@@ -17,8 +17,10 @@ interface ProjectTableProps {
   projects: ProjectData[];
 }
 
+type SortField = keyof ProjectData | 'financials.totalValue' | 'area.total';
+
 const ProjectTable: React.FC<ProjectTableProps> = ({ projects }) => {
-  const [sortField, setSortField] = React.useState<keyof ProjectData | null>(null);
+  const [sortField, setSortField] = React.useState<SortField | null>(null);
   const [sortDirection, setSortDirection] = React.useState<"asc" | "desc">("asc");
   
   // Helper function to format currency values
@@ -32,7 +34,7 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ projects }) => {
     }
   };
   
-  const handleSort = (field: keyof ProjectData) => {
+  const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {

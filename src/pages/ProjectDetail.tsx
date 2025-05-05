@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProjectData } from "@/hooks/useProjectData";
-import { PieChart, BarChart, FileChart, ArrowLeft, Building, MapPin, Calendar } from "lucide-react";
-import ProjectValueChart from "./charts/ProjectValueChart";
+import { PieChart, BarChart, FileChartIcon, ArrowLeft, Building, MapPin, Calendar } from "lucide-react";
+import ProjectValueChart from "@/components/charts/ProjectValueChart";
 
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();

@@ -16,7 +16,7 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { PieChart, BarChart, Table, Filter, FileChart } from "lucide-react";
+import { PieChart, BarChart, Table, Filter, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const RealEstateSidebar = () => {
@@ -69,7 +69,7 @@ const RealEstateSidebar = () => {
                   tooltip="Reports"
                 >
                   <Link to="/reports">
-                    <FileChart className="h-5 w-5" />
+                    <FileText className="h-5 w-5" />
                     <span>Custom Reports</span>
                   </Link>
                 </SidebarMenuButton>
