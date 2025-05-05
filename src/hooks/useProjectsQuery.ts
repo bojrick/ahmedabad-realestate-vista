@@ -118,12 +118,12 @@ export const useProjectSummaryQuery = () => {
         
         // Create minimal project objects with just the fields needed for summary calculations
         const minimalProjects = data.map(item => ({
-          id: item.projectregid?.toString() || '',
+          id: item.projectregid?.toString() || '', // Safe access with optional chaining
           name: '',
           promoter: '',
           type: item.projecttype || 'Unknown',
           status: item.projectstatus || 'Unknown',
-          progress: parseFloat(item.projectprogress) || 0,
+          progress: parseFloat(item.projectprogress || '0'), // Ensure we convert to number
           location: item.distname || '',
           coordinates: null,
           address: '',
@@ -185,7 +185,7 @@ export const useProjectDetailQuery = (id: string) => {
         const { data, error } = await supabase
           .from('gujrera_projects_detailed_summary')
           .select('*')
-          .eq('projectregid', id)
+          .eq('projectregid', parseInt(id)) // Convert string to number
           .single();
           
         if (error) throw error;

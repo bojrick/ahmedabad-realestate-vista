@@ -3,6 +3,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProjectData, ProjectSummary, ProjectLocation } from "@/types/project";
 
 /**
+ * Fetches projects from the database
+ * @returns Array of ProjectData
+ */
+export async function fetchProjects(): Promise<ProjectData[]> {
+  try {
+    const { data, error } = await supabase
+      .from('gujrera_projects_detailed_summary')
+      .select('*')
+      .limit(500); // Limit to avoid performance issues
+    
+    if (error) throw error;
+    
+    return data.map(transformProjectData);
+  } catch (error) {
+    console.error("Error fetching projects:", error);
+    throw error;
+  }
+}
+
+/**
  * Transforms raw Supabase project data into our application model
  * @param rawProject Raw project data from Supabase
  * @returns Formatted ProjectData object
