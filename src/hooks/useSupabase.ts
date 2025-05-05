@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Property, PropertyStats, PropertyFilters } from "@/types/property";
+import { Property, PropertyStats, PropertyFilters, PropertyType, ListingType } from "@/types/property";
 import { useToast } from "@/hooks/use-toast";
 
 // Mock data for initial development until Supabase is connected
