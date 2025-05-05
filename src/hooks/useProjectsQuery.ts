@@ -1,3 +1,4 @@
+
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectData, ProjectFilters } from "@/types/project";
@@ -97,7 +98,7 @@ export const useProjectsQuery = (filters: ProjectFilters = {}) => {
 };
 
 /**
- * Custom hook to fetch project summary statistics
+ * Custom hook to fetch project summary statistics directly from database
  */
 export const useProjectSummaryQuery = () => {
   const { toast } = useToast();
@@ -106,65 +107,102 @@ export const useProjectSummaryQuery = () => {
     queryKey: ['projectSummary'],
     queryFn: async () => {
       try {
-        // Fetch just the fields needed for summary calculations to optimize data transfer
-        const { data, error } = await supabase
+        // Get total project count using direct query
+        const { count: totalProjectsCount, error: countError } = await supabase
           .from('gujrera_projects_detailed_summary')
-          .select(`
-            projectregid, projecttype, projectstatus, distname, 
-            projectprogress, total_units, booked_flats,
-            total_unit_consideration, total_received_amount
-          `)
-          .limit(2000); // Increased this limit to get better representation of data
-          
-        if (error) throw error;
+          .select('*', { count: 'exact', head: true });
         
-        // Create minimal project objects with just the fields needed for summary calculations
-        const minimalProjects = data.map(item => ({
-          id: (item.projectregid !== undefined) ? item.projectregid.toString() : '',
-          name: '',
-          promoter: '',
-          type: item.projecttype || 'Unknown',
-          status: item.projectstatus || 'Unknown',
-          progress: parseFloat(item.projectprogress || '0'),
-          location: item.distname || '',
-          coordinates: null,
-          address: '',
-          area: {
-            total: 0,
-            carpet: 0,
-            built: 0,
-            balcony: 0,
-          },
-          units: {
-            total: item.total_units || 0,
-            booked: item.booked_flats || 0,
-            residential: 0,
-            commercial: 0,
-            bookingPercentage: item.booked_flats && item.total_units ? 
-              (item.booked_flats / item.total_units) * 100 : 0
-          },
-          financials: {
-            totalValue: item.total_unit_consideration || 0,
-            receivedAmount: item.total_received_amount || 0,
-            collectionPercentage: item.total_received_amount && item.total_unit_consideration ? 
-              (item.total_received_amount / item.total_unit_consideration) * 100 : 0,
-            constructionCost: 0,
-            landCost: 0
-          },
-          dates: {
-            start: null,
-            completion: null,
-            lastUpdated: null
+        if (countError) throw countError;
+
+        // Get total project value using direct aggregation
+        const { data: totalValueData, error: valueError } = await supabase
+          .rpc('get_total_project_value');
+        
+        if (valueError) throw valueError;
+        const totalValue = totalValueData || 0;
+
+        // Get average booking percentage
+        const { data: avgBookingData, error: bookingError } = await supabase
+          .rpc('get_avg_booking_percentage');
+        
+        if (bookingError) throw bookingError;
+        const avgBookingPercentage = avgBookingData || 0;
+
+        // Get average project progress
+        const { data: avgProgressData, error: progressError } = await supabase
+          .rpc('get_avg_project_progress');
+        
+        if (progressError) throw progressError;
+        const avgProgress = avgProgressData || 0;
+        
+        // Fetch distribution data for charts
+        // Get project types distribution
+        const { data: typeData, error: typeError } = await supabase
+          .from('gujrera_projects_detailed_summary')
+          .select('projecttype, count')
+          .not('projecttype', 'is', null)
+          .group('projecttype');
+        
+        if (typeError) throw typeError;
+        
+        const projectsByType: Record<string, number> = {};
+        typeData.forEach(item => {
+          projectsByType[item.projecttype || 'Unknown'] = item.count;
+        });
+        
+        // Get project statuses distribution
+        const { data: statusData, error: statusError } = await supabase
+          .from('gujrera_projects_detailed_summary')
+          .select('projectstatus, count')
+          .not('projectstatus', 'is', null)
+          .group('projectstatus');
+        
+        if (statusError) throw statusError;
+        
+        const projectsByStatus: Record<string, number> = {};
+        statusData.forEach(item => {
+          projectsByStatus[item.projectstatus || 'Unknown'] = item.count;
+        });
+        
+        // Get project locations distribution
+        const { data: locationData, error: locationError } = await supabase
+          .from('gujrera_projects_detailed_summary')
+          .select('distname, count')
+          .not('distname', 'is', null)
+          .group('distname')
+          .order('count', { ascending: false })
+          .limit(15);
+        
+        if (locationError) throw locationError;
+        
+        const projectsByLocation: Record<string, number> = {};
+        locationData.forEach(item => {
+          projectsByLocation[item.distname || 'Unknown'] = item.count;
+        });
+        
+        // Get financial summary
+        const { data: receivedAmountData, error: receivedError } = await supabase
+          .rpc('get_total_received_amount');
+        
+        if (receivedError) throw receivedError;
+        const receivedAmount = receivedAmountData || 0;
+        
+        // Use the actual values from the database for the summary
+        return {
+          totalProjects: totalProjectsCount || TOTAL_PROJECTS_COUNT,
+          totalValue: totalValue,
+          totalArea: 0, // This would need another aggregation query if needed
+          avgBookingPercentage: avgBookingPercentage,
+          avgProgress: avgProgress,
+          projectsByType: projectsByType,
+          projectsByStatus: projectsByStatus,
+          projectsByLocation: projectsByLocation,
+          financialSummary: {
+            totalValue: totalValue,
+            receivedAmount: receivedAmount,
+            avgCollectionPercentage: totalValue > 0 ? (receivedAmount / totalValue) * 100 : 0
           }
-        }));
-        
-        // Calculate summary with the data retrieved
-        const summary = calculateProjectsSummary(minimalProjects);
-        
-        // Set the total projects count to the known value
-        summary.totalProjects = TOTAL_PROJECTS_COUNT;
-        
-        return summary;
+        };
       } catch (error) {
         console.error("Error fetching project summary:", error);
         toast({

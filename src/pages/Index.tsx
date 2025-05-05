@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useProjectSummaryQuery } from "@/hooks/useProjectsQuery";
+import { useProjectSummaryQuery, useProjectsQuery } from "@/hooks/useProjectsQuery";
 import Navbar from "@/components/Navbar";
 import EnhancedDashboard from "@/components/EnhancedDashboard";
 import ProjectList from "@/components/ProjectList";
@@ -15,6 +15,12 @@ const Index = () => {
   } = useProjectSummaryQuery();
   
   const [activeTab, setActiveTab] = useState("dashboard");
+  
+  // Get the first 12 projects for the projects tab
+  const { 
+    projects, 
+    isLoading: projectsLoading 
+  } = useProjectsQuery();
   
   if (isError) {
     return <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -56,7 +62,12 @@ const Index = () => {
               </p>
             </div>
             
-            <ProjectList />
+            <ProjectList 
+              projects={projects}
+              loading={projectsLoading}
+              onFilterChange={() => {}} // No-op since this is a simplified view
+              onResetFilters={() => {}} // No-op since this is a simplified view
+            />
           </TabsContent>
         </Tabs>
       </main>
