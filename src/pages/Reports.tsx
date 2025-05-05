@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  ChartBar, ChartLineUp, ChartPie, Table, FileText, Download, BarChart3, LineChart
+  ChartBar, ChartLine, ChartPie, Table, FileText, Download, BarChart3, LineChart
 } from "lucide-react";
 
 // Custom report templates data
@@ -58,7 +58,7 @@ const analysisTypes = [
     id: 2,
     title: "Price Trends",
     description: "Historical and predicted pricing analysis",
-    icon: ChartLineUp,
+    icon: ChartLine,
     newFeature: false
   }
 ];
