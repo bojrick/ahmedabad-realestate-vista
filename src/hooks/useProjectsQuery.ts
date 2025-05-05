@@ -1,7 +1,7 @@
 
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ProjectData, ProjectSummary, ProjectFilters } from "@/types/project";
+import { ProjectData, ProjectFilters } from "@/types/project";
 import { useToast } from "@/hooks/use-toast";
 import { transformProjectData, calculateProjectsSummary } from "@/adapters/projectsAdapter";
 
@@ -108,7 +108,7 @@ export const useProjectSummaryQuery = () => {
         const { data, error } = await supabase
           .from('gujrera_projects_detailed_summary')
           .select(`
-            projecttype, projectstatus, distname, 
+            projectregid, projecttype, projectstatus, distname, 
             projectprogress, total_units, booked_flats,
             total_unit_consideration, total_received_amount
           `)
@@ -118,7 +118,7 @@ export const useProjectSummaryQuery = () => {
         
         // Create minimal project objects with just the fields needed for summary calculations
         const minimalProjects = data.map(item => ({
-          id: item.projectregid?.toString() || '', // Safe access with optional chaining
+          id: (item.projectregid !== undefined) ? item.projectregid.toString() : '',
           name: '',
           promoter: '',
           type: item.projecttype || 'Unknown',
