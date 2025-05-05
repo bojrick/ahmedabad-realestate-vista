@@ -9,19 +9,22 @@ import { Separator } from "@/components/ui/separator";
 import { Search, Filter } from "lucide-react";
 import { ProjectData, ProjectFilters } from "@/types/project";
 import ProjectCard from "./ProjectCard";
+import ProjectTable from "./ProjectTable";
 
 interface ProjectListProps {
   projects: ProjectData[];
   loading: boolean;
   onFilterChange: (filters: ProjectFilters) => void;
   onResetFilters: () => void;
+  viewType?: "list" | "table";
 }
 
 const ProjectList: React.FC<ProjectListProps> = ({ 
   projects, 
   loading, 
   onFilterChange, 
-  onResetFilters 
+  onResetFilters,
+  viewType = "list"
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<ProjectFilters>({});
@@ -186,11 +189,17 @@ const ProjectList: React.FC<ProjectListProps> = ({
           <p className="text-muted-foreground">Try adjusting your filters or search terms</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map(project => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
+        <>
+          {viewType === "list" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProjects.map(project => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+          ) : (
+            <ProjectTable projects={filteredProjects} />
+          )}
+        </>
       )}
       
       <div className="mt-6 text-center text-sm text-muted-foreground">
