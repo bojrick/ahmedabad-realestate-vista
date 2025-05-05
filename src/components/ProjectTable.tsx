@@ -17,7 +17,7 @@ interface ProjectTableProps {
   projects: ProjectData[];
 }
 
-type SortField = keyof ProjectData | 'financials.totalValue' | 'area.total';
+type SortField = keyof ProjectData | 'financials.totalValue' | 'area.total' | 'units.total';
 
 const ProjectTable: React.FC<ProjectTableProps> = ({ projects }) => {
   const [sortField, setSortField] = React.useState<SortField | null>(null);
@@ -43,6 +43,12 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ projects }) => {
     }
   };
 
+  // Helper function to get nested property value
+  const getNestedValue = (object: any, path: string) => {
+    const keys = path.split('.');
+    return keys.reduce((obj, key) => obj && obj[key] !== undefined ? obj[key] : null, object);
+  };
+
   // Basic sorting functionality
   const sortedProjects = [...projects].sort((a, b) => {
     if (!sortField) return 0;
@@ -51,12 +57,9 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ projects }) => {
     let fieldB: any;
     
     // Handle nested properties
-    if (sortField === "financials.totalValue") {
-      fieldA = a.financials.totalValue;
-      fieldB = b.financials.totalValue;
-    } else if (sortField === "area.total") {
-      fieldA = a.area.total;
-      fieldB = b.area.total;
+    if (sortField.includes('.')) {
+      fieldA = getNestedValue(a, sortField);
+      fieldB = getNestedValue(b, sortField);
     } else {
       fieldA = a[sortField as keyof ProjectData];
       fieldB = b[sortField as keyof ProjectData];

@@ -6,7 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
-import { Search, Filter } from "lucide-react";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationEllipsis, 
+  PaginationItem,
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from "@/components/ui/pagination";
+import { Search, Filter, ChevronDown, ChevronUp } from "lucide-react";
 import { ProjectData, ProjectFilters } from "@/types/project";
 import ProjectCard from "./ProjectCard";
 import ProjectTable from "./ProjectTable";
@@ -17,6 +26,11 @@ interface ProjectListProps {
   onFilterChange: (filters: ProjectFilters) => void;
   onResetFilters: () => void;
   viewType?: "list" | "table";
+  totalCount?: number;
+  currentPage?: number;
+  onPageChange?: (page: number) => void;
+  hasNextPage?: boolean;
+  hasPreviousPage?: boolean;
 }
 
 const ProjectList: React.FC<ProjectListProps> = ({ 
@@ -24,13 +38,18 @@ const ProjectList: React.FC<ProjectListProps> = ({
   loading, 
   onFilterChange, 
   onResetFilters,
-  viewType = "list"
+  viewType = "list",
+  totalCount = 0,
+  currentPage = 1,
+  onPageChange,
+  hasNextPage = false,
+  hasPreviousPage = false
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState<ProjectFilters>({});
   const [showFilters, setShowFilters] = useState(false);
   
-  // Get unique project types, statuses, and locations
+  // Get unique project types, statuses, and locations from available projects
   const projectTypes = [...new Set(projects.map(project => project.type))].filter(Boolean);
   const projectStatuses = [...new Set(projects.map(project => project.status))].filter(Boolean);
   const projectLocations = [...new Set(projects.map(project => project.location))].filter(Boolean);
@@ -65,6 +84,51 @@ const ProjectList: React.FC<ProjectListProps> = ({
       )
     : projects;
 
+  // Calculate pagination
+  const pageSize = 12; // Number of items per page
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+    
+    if (totalPages <= maxPagesToShow) {
+      // Show all pages if there are fewer than maxPagesToShow
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      // Show first page, last page, current page, and pages around current page
+      if (currentPage <= 3) {
+        // Current page is near the beginning
+        for (let i = 1; i <= 4; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push(-1); // Ellipsis
+        pageNumbers.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        // Current page is near the end
+        pageNumbers.push(1);
+        pageNumbers.push(-1); // Ellipsis
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pageNumbers.push(i);
+        }
+      } else {
+        // Current page is in the middle
+        pageNumbers.push(1);
+        pageNumbers.push(-1); // Ellipsis
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push(-1); // Ellipsis
+        pageNumbers.push(totalPages);
+      }
+    }
+    
+    return pageNumbers;
+  };
+
   return (
     <div>
       <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
@@ -85,6 +149,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
         >
           <Filter size={16} />
           Filters
+          {showFilters ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </Button>
         
         <Button onClick={applyFilters}>
@@ -202,8 +267,49 @@ const ProjectList: React.FC<ProjectListProps> = ({
         </>
       )}
       
+      {/* Pagination */}
+      {totalCount > pageSize && (
+        <div className="mt-8">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => onPageChange && onPageChange(currentPage - 1)}
+                  className={!hasPreviousPage ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+              
+              {getPageNumbers().map((pageNumber, i) => (
+                pageNumber === -1 ? (
+                  <PaginationItem key={`ellipsis-${i}`}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink
+                      isActive={pageNumber === currentPage}
+                      onClick={() => onPageChange && onPageChange(pageNumber)}
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
+              ))}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => onPageChange && onPageChange(currentPage + 1)}
+                  className={!hasNextPage ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
+      
       <div className="mt-6 text-center text-sm text-muted-foreground">
-        Showing {filteredProjects.length} of {projects.length} projects
+        Showing {filteredProjects.length} projects
+        {totalCount > 0 && ` of ${totalCount} total`}
       </div>
     </div>
   );

@@ -3,28 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProjectData, ProjectSummary, ProjectLocation } from "@/types/project";
 
 /**
- * Fetches and transforms project data from Supabase
- */
-export async function fetchProjects(): Promise<ProjectData[]> {
-  try {
-    const { data, error } = await supabase
-      .from('gujrera_projects_detailed_summary')
-      .select('*');
-    
-    if (error) throw error;
-    
-    // Transform the data to our application model
-    return data.map(transformProjectData);
-  } catch (error) {
-    console.error("Error fetching projects:", error);
-    throw error;
-  }
-}
-
-/**
  * Transforms raw Supabase project data into our application model
+ * @param rawProject Raw project data from Supabase
+ * @returns Formatted ProjectData object
  */
-function transformProjectData(rawProject: any): ProjectData {
+export function transformProjectData(rawProject: any): ProjectData {
   // Parse location coordinates if available
   let coordinates: ProjectLocation | null = null;
   if (rawProject.location_coordinates) {
@@ -42,7 +25,7 @@ function transformProjectData(rawProject: any): ProjectData {
   }
 
   return {
-    id: rawProject.projectregid.toString(),
+    id: rawProject.projectregid?.toString() || '',
     name: rawProject.projectname || 'Unnamed Project',
     promoter: rawProject.promotername || 'Unknown Promoter',
     type: rawProject.projecttype || 'Unknown',
@@ -130,12 +113,26 @@ export function calculateProjectsSummary(projects: ProjectData[]): ProjectSummar
     projectsByStatus[status] = (projectsByStatus[status] || 0) + 1;
   });
   
-  // Group by location
-  const projectsByLocation: Record<string, number> = {};
+  // Group by location - limit to top locations for performance
+  const locationCounts: {location: string, count: number}[] = [];
   projects.forEach(p => {
     const location = p.location || 'Unknown';
-    projectsByLocation[location] = (projectsByLocation[location] || 0) + 1;
+    const existing = locationCounts.find(item => item.location === location);
+    if (existing) {
+      existing.count++;
+    } else {
+      locationCounts.push({ location, count: 1 });
+    }
   });
+  
+  // Convert to record and take top locations
+  const projectsByLocation: Record<string, number> = {};
+  locationCounts
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 15) // Limit to top 15 locations for better performance
+    .forEach(item => {
+      projectsByLocation[item.location] = item.count;
+    });
   
   // Financial summary
   const receivedAmount = projects.reduce((sum, p) => sum + p.financials.receivedAmount, 0);
@@ -159,4 +156,45 @@ export function calculateProjectsSummary(projects: ProjectData[]): ProjectSummar
       avgCollectionPercentage
     }
   };
+}
+
+/**
+ * Fetches projects with optimized pagination
+ */
+export async function fetchPaginatedProjects(
+  page: number = 0, 
+  pageSize: number = 12,
+  filters: any = {}
+): Promise<{ data: ProjectData[], count: number }> {
+  try {
+    let query = supabase.from('gujrera_projects_detailed_summary').select('*', { count: 'exact' });
+    
+    // Apply filters
+    if (filters.type && filters.type.length) {
+      query = query.in('projecttype', filters.type);
+    }
+    
+    if (filters.status && filters.status.length) {
+      query = query.in('projectstatus', filters.status);
+    }
+    
+    if (filters.location && filters.location.length) {
+      query = query.in('distname', filters.location);
+    }
+    
+    // Add pagination
+    const { data, error, count } = await query
+      .range(page * pageSize, (page + 1) * pageSize - 1)
+      .order('projectregid', { ascending: false });
+    
+    if (error) throw error;
+    
+    return {
+      data: data.map(transformProjectData),
+      count: count || 0
+    };
+  } catch (error) {
+    console.error("Error fetching projects:", error);
+    throw error;
+  }
 }

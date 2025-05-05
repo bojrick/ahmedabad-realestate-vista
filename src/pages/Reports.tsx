@@ -1,210 +1,191 @@
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+
+import React from "react";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useProjectData } from "@/hooks/useProjectData";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, BarChart, PieChart, Table, Download } from "lucide-react";
+import {
+  ChartBar, ChartLineUp, ChartPie, Table, FileText, Download, BarChart3, LineChart
+} from "lucide-react";
+
+// Custom report templates data
+const reportTemplates = [
+  {
+    id: 1,
+    title: "Project Overview",
+    description: "Complete summary report of all projects across regions",
+    icon: ChartBar,
+    popular: true
+  },
+  {
+    id: 2,
+    title: "Financial Performance",
+    description: "Analysis of booking values and collection efficiency",
+    icon: BarChart3,
+    popular: false
+  },
+  {
+    id: 3,
+    title: "Progress Tracking",
+    description: "Track completion progress against timelines",
+    icon: LineChart,
+    popular: true
+  },
+  {
+    id: 4,
+    title: "Project Comparison",
+    description: "Compare similar projects across parameters",
+    icon: Table,
+    popular: false
+  }
+];
+
+// Custom analysis types
+const analysisTypes = [
+  {
+    id: 1,
+    title: "Location Analysis",
+    description: "Compare real estate trends across different locations",
+    icon: ChartPie,
+    newFeature: true
+  },
+  {
+    id: 2,
+    title: "Price Trends",
+    description: "Historical and predicted pricing analysis",
+    icon: ChartLineUp,
+    newFeature: false
+  }
+];
 
 const Reports = () => {
-  const { allProjects, loading } = useProjectData();
-  const [reportName, setReportName] = useState("");
-  const [reportType, setReportType] = useState("summary");
-  const [chartType, setChartType] = useState("bar");
-
-  const fieldGroups = [
-    {
-      name: "Basic Info",
-      fields: [
-        { id: "projectname", label: "Project Name", selected: true },
-        { id: "promotername", label: "Promoter Name", selected: true },
-        { id: "projecttype", label: "Project Type", selected: true },
-        { id: "projectstatus", label: "Project Status", selected: true },
-      ]
-    },
-    {
-      name: "Location",
-      fields: [
-        { id: "projectaddress", label: "Project Address", selected: false },
-        { id: "distname", label: "District", selected: true },
-        { id: "pincode", label: "PIN Code", selected: false },
-      ]
-    },
-    {
-      name: "Financial",
-      fields: [
-        { id: "total_unit_consideration", label: "Total Value", selected: true },
-        { id: "total_received_amount", label: "Received Amount", selected: true },
-        { id: "payment_collection_percentage", label: "Collection %", selected: true },
-        { id: "booking_percentage", label: "Booking %", selected: true },
-      ]
-    },
-    {
-      name: "Area Details",
-      fields: [
-        { id: "totareaofland", label: "Total Land Area", selected: false },
-        { id: "total_carpet_area", label: "Total Carpet Area", selected: true },
-        { id: "total_builtup_area", label: "Total Built-up Area", selected: false },
-      ]
-    }
-  ];
-
   return (
-    <div>
-      <div className="mb-6">
+    <div className="space-y-6">
+      <div>
         <h1 className="text-3xl font-bold text-realestate-primary mb-2">
           Custom Reports
         </h1>
         <p className="text-muted-foreground">
-          Build and export custom reports from RERA project data
+          Generate standardized and custom reports for your project analysis needs
         </p>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <FileText className="mr-2 h-5 w-5" />
-                Report Builder
-              </CardTitle>
+      
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Report Templates</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {reportTemplates.map((template) => (
+            <Card key={template.id}>
+              <CardHeader className="pb-2">
+                <div className="flex items-start justify-between">
+                  <template.icon className="h-8 w-8 text-realestate-primary opacity-80" />
+                  {template.popular && (
+                    <span className="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded">
+                      Popular
+                    </span>
+                  )}
+                </div>
+                <CardTitle className="text-lg">{template.title}</CardTitle>
+                <CardDescription>{template.description}</CardDescription>
+              </CardHeader>
+              <CardFooter>
+                <Button className="w-full">Generate</Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      </div>
+      
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Custom Analysis</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {analysisTypes.map((analysis) => (
+            <Card key={analysis.id}>
+              <CardHeader className="pb-2">
+                <div className="flex items-start justify-between">
+                  <analysis.icon className="h-8 w-8 text-realestate-primary opacity-80" />
+                  {analysis.newFeature && (
+                    <span className="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded">
+                      New
+                    </span>
+                  )}
+                </div>
+                <CardTitle className="text-lg">{analysis.title}</CardTitle>
+                <CardDescription>{analysis.description}</CardDescription>
+              </CardHeader>
+              <CardFooter>
+                <Button variant="outline" className="w-full">Create Analysis</Button>
+              </CardFooter>
+            </Card>
+          ))}
+          
+          <Card className="bg-gray-50 border-dashed">
+            <CardHeader className="pb-2">
+              <div className="flex items-start justify-between">
+                <FileText className="h-8 w-8 text-gray-400" />
+              </div>
+              <CardTitle className="text-lg">Custom Report</CardTitle>
+              <CardDescription>Build a report from scratch with custom parameters</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="report-name">Report Name</Label>
-                <Input 
-                  id="report-name" 
-                  value={reportName}
-                  onChange={(e) => setReportName(e.target.value)}
-                  placeholder="My Custom Report" 
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Report Type</Label>
-                <Select value={reportType} onValueChange={setReportType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select report type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="summary">Summary Report</SelectItem>
-                    <SelectItem value="detailed">Detailed Report</SelectItem>
-                    <SelectItem value="financial">Financial Analysis</SelectItem>
-                    <SelectItem value="location">Location-based Report</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Visualization Type</Label>
-                <Select value={chartType} onValueChange={setChartType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select chart type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="bar">Bar Chart</SelectItem>
-                    <SelectItem value="pie">Pie Chart</SelectItem>
-                    <SelectItem value="line">Line Chart</SelectItem>
-                    <SelectItem value="table">Table Only</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="border rounded-md p-3 space-y-4 mt-4">
-                <Label>Select Fields to Include</Label>
-                
-                {fieldGroups.map((group) => (
-                  <div key={group.name} className="space-y-2">
-                    <h4 className="text-sm font-medium">{group.name}</h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      {group.fields.map((field) => (
-                        <div key={field.id} className="flex items-center space-x-2">
-                          <Checkbox id={field.id} defaultChecked={field.selected} />
-                          <Label htmlFor={field.id} className="text-xs">{field.label}</Label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <Button className="w-full">
-                <FileText className="mr-2 h-4 w-4" />
-                Generate Report
-              </Button>
-              
-              <div className="flex justify-between">
-                <Button variant="outline" size="sm">
-                  Save Template
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Download className="mr-1 h-4 w-4" />
-                  Export
-                </Button>
-              </div>
-            </CardContent>
+            <CardFooter>
+              <Button variant="outline" className="w-full">Create Custom</Button>
+            </CardFooter>
           </Card>
         </div>
-        
-        <div className="lg:col-span-2">
-          <Card className="h-full">
-            <CardHeader>
-              <CardTitle>
-                Report Preview
-                {reportName && `: ${reportName}`}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="chart">
-                <TabsList>
-                  <TabsTrigger value="chart">
-                    {chartType === "bar" && <BarChart className="mr-1 h-4 w-4" />}
-                    {chartType === "pie" && <PieChart className="mr-1 h-4 w-4" />}
-                    {chartType === "line" && <BarChart className="mr-1 h-4 w-4" />}
-                    Chart
-                  </TabsTrigger>
-                  <TabsTrigger value="table">
-                    <Table className="mr-1 h-4 w-4" />
-                    Table
-                  </TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="chart" className="h-[600px] flex items-center justify-center border rounded-md mt-4">
-                  {loading ? (
-                    <p>Loading chart data...</p>
-                  ) : (
-                    <div className="text-center">
-                      <p className="text-muted-foreground">
-                        {reportName || "Custom Report"} will appear here
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Select fields and click Generate Report
-                      </p>
-                    </div>
-                  )}
-                </TabsContent>
-                
-                <TabsContent value="table" className="h-[600px] flex items-center justify-center border rounded-md mt-4">
-                  {loading ? (
-                    <p>Loading table data...</p>
-                  ) : (
-                    <div className="text-center">
-                      <p className="text-muted-foreground">
-                        Data table will appear here
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Select fields and click Generate Report
-                      </p>
-                    </div>
-                  )}
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </div>
+      </div>
+      
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">Recent Reports</h2>
+        <Card>
+          <CardContent className="p-0">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr className="border-b">
+                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Report Name</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Type</th>
+                  <th className="text-left px-4 py-3 text-sm font-medium text-gray-500">Generated</th>
+                  <th className="text-right px-4 py-3 text-sm font-medium text-gray-500">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b">
+                  <td className="px-4 py-3 text-sm">Q2 Project Summary</td>
+                  <td className="px-4 py-3 text-sm">
+                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded">
+                      Standard
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm">2 days ago</td>
+                  <td className="px-4 py-3 text-right">
+                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Download</span>
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 text-sm">Performance Analysis 2025</td>
+                  <td className="px-4 py-3 text-sm">
+                    <span className="bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded">
+                      Custom
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm">1 week ago</td>
+                  <td className="px-4 py-3 text-right">
+                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Download</span>
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

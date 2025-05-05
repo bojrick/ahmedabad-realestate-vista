@@ -4,15 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useProjectData } from "@/hooks/useProjectData";
-import { PieChart, BarChart, FileChartIcon, ArrowLeft, Building, MapPin, Calendar } from "lucide-react";
+import { useProjectDetailQuery } from "@/hooks/useProjectsQuery";
+import { PieChart, BarChart, FileText, ArrowLeft, Building, MapPin, Calendar } from "lucide-react";
 import ProjectValueChart from "@/components/charts/ProjectValueChart";
 
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { allProjects, loading, error } = useProjectData();
+  const { data: project, isLoading, isError, error } = useProjectDetailQuery(id || '');
   
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
         <p>Loading project details...</p>
@@ -20,19 +20,17 @@ const ProjectDetail = () => {
     );
   }
   
-  if (error) {
+  if (isError) {
     return (
       <div className="text-center py-12">
         <h2 className="text-xl font-bold text-red-500 mb-2">Error Loading Project</h2>
-        <p className="text-muted-foreground mb-4">{error}</p>
+        <p className="text-muted-foreground mb-4">{(error as Error)?.message || "An unknown error occurred"}</p>
         <Button asChild variant="outline">
           <Link to="/projects">Back to Projects</Link>
         </Button>
       </div>
     );
   }
-  
-  const project = allProjects.find(p => p.id === id);
   
   if (!project) {
     return (
