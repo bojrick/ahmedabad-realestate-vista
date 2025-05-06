@@ -212,14 +212,12 @@ export const useProjectSummaryQuery = () => {
         });
         
         // 3. Financial Health Metrics
-        // Get land and development costs
+        // Get land and development costs - we need to adjust this to use only available columns
         const { data: financialData, error: financialError } = await supabase
           .from('gujrera_projects_detailed_summary')
           .select(`
             subtotaloflandcosta,
-            subtotaloflandcostb,
             subtotofdevelopcosta,
-            subtotofdevelopcostb,
             paymentoftaxesa,
             paymentoftaxesb,
             amountofpremiumpayablea,
@@ -244,11 +242,11 @@ export const useProjectSummaryQuery = () => {
         let costVarianceCount = 0;
         
         financialData.forEach(item => {
-          // Land costs
-          totalLandCost += (item.subtotaloflandcosta || 0) + (item.subtotaloflandcostb || 0);
+          // Land costs - only using subtotaloflandcosta since subtotaloflandcostb doesn't exist
+          totalLandCost += (item.subtotaloflandcosta || 0);
           
-          // Development costs
-          totalDevCost += (item.subtotofdevelopcosta || 0) + (item.subtotofdevelopcostb || 0);
+          // Development costs - only using subtotofdevelopcosta since subtotofdevelopcostb doesn't exist
+          totalDevCost += (item.subtotofdevelopcosta || 0);
           
           // Taxes and premiums
           totalTaxesAndPremiums += (item.paymentoftaxesa || 0) + (item.paymentoftaxesb || 0) +
