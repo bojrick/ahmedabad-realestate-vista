@@ -9,6 +9,10 @@ import ProjectDetail from "./pages/ProjectDetail";
 import Reports from "./pages/Reports";
 import MarketAnalysis from "./pages/MarketAnalysis";
 import TrendAnalysis from "./pages/TrendAnalysis";
+import MarketOverview from "./pages/dashboard/MarketOverview";
+import ProjectPipeline from "./pages/dashboard/ProjectPipeline";
+import FinancialHealth from "./pages/dashboard/FinancialHealth";
+import Performance from "./pages/dashboard/Performance";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +25,38 @@ const App = () => (
           element={
             <AppLayout>
               <Index />
+            </AppLayout>
+          } 
+        />
+        <Route 
+          path="/dashboard/market-overview" 
+          element={
+            <AppLayout>
+              <MarketOverview />
+            </AppLayout>
+          } 
+        />
+        <Route 
+          path="/dashboard/project-pipeline" 
+          element={
+            <AppLayout>
+              <ProjectPipeline />
+            </AppLayout>
+          } 
+        />
+        <Route 
+          path="/dashboard/financial-health" 
+          element={
+            <AppLayout>
+              <FinancialHealth />
+            </AppLayout>
+          } 
+        />
+        <Route 
+          path="/dashboard/performance" 
+          element={
+            <AppLayout>
+              <Performance />
             </AppLayout>
           } 
         />

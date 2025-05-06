@@ -16,7 +16,10 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { PieChart, BarChart, Table, Filter, FileText } from "lucide-react";
+import { 
+  PieChart, BarChart, Table, Filter, FileText,
+  ChartPie, TrendingUp, CircleDollarSign, LayoutDashboard
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const RealEstateSidebar = () => {
@@ -24,6 +27,10 @@ const RealEstateSidebar = () => {
   
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+  
+  const isActiveGroup = (pathPrefix: string) => {
+    return location.pathname.startsWith(pathPrefix);
   };
 
   return (
@@ -45,11 +52,65 @@ const RealEstateSidebar = () => {
                   tooltip="Dashboard"
                 >
                   <Link to="/">
-                    <PieChart className="h-5 w-5" />
-                    <span>Dashboard</span>
+                    <LayoutDashboard className="h-5 w-5" />
+                    <span>Dashboard Home</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              
+              {/* Dashboard Sub-Navigation */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive("/dashboard/market-overview")}
+                  tooltip="Market Overview"
+                >
+                  <Link to="/dashboard/market-overview">
+                    <ChartPie className="h-5 w-5" />
+                    <span>Market Overview</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive("/dashboard/project-pipeline")}
+                  tooltip="Project Pipeline"
+                >
+                  <Link to="/dashboard/project-pipeline">
+                    <BarChart className="h-5 w-5" />
+                    <span>Project Pipeline</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive("/dashboard/financial-health")}
+                  tooltip="Financial Health"
+                >
+                  <Link to="/dashboard/financial-health">
+                    <CircleDollarSign className="h-5 w-5" />
+                    <span>Financial Health</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive("/dashboard/performance")}
+                  tooltip="Performance"
+                >
+                  <Link to="/dashboard/performance">
+                    <TrendingUp className="h-5 w-5" />
+                    <span>Performance</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
@@ -91,7 +152,7 @@ const RealEstateSidebar = () => {
                   tooltip="Market Analysis"
                 >
                   <Link to="/market-analysis">
-                    <BarChart className="h-5 w-5" />
+                    <PieChart className="h-5 w-5" />
                     <span>Market Analysis</span>
                   </Link>
                 </SidebarMenuButton>

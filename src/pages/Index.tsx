@@ -1,9 +1,7 @@
 
-import React, { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useProjectSummaryQuery, useProjectsQuery } from "@/hooks/useProjectsQuery";
+import React from "react";
+import { useProjectSummaryQuery } from "@/hooks/useProjectsQuery";
 import EnhancedDashboard from "@/components/EnhancedDashboard";
-import ProjectList from "@/components/ProjectList";
 
 const Index = () => {
   const {
@@ -12,15 +10,6 @@ const Index = () => {
     isError,
     error
   } = useProjectSummaryQuery();
-  
-  const [activeTab, setActiveTab] = useState("dashboard");
-  
-  // Get the first 12 projects for the projects tab
-  const { 
-    projects, 
-    isLoading: projectsLoading,
-    totalCount
-  } = useProjectsQuery();
   
   if (isError) {
     return <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -32,43 +21,10 @@ const Index = () => {
       </div>;
   }
   
-  return <div className="min-h-screen bg-gray-50">
+  return (
+    <div className="min-h-screen bg-gray-50">
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-realestate-primary">
-            Gujarat RERA Project Analytics
-          </h1>
-          <p className="text-muted-foreground">
-            Real estate analytics and insights dashboard for Gujarat RERA registered projects
-          </p>
-        </div>
-        
-        <Tabs defaultValue="dashboard" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full md:w-[400px] grid-cols-2">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="projects">Projects</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="dashboard" className="pt-6">
-            <EnhancedDashboard summary={summary} loading={isLoading} />
-          </TabsContent>
-          
-          <TabsContent value="projects" className="pt-6">
-            <div className="mb-4">
-              <p className="text-sm text-muted-foreground">
-                Showing recent projects. Visit the <a href="/projects" className="text-blue-600 hover:underline">Projects Explorer</a> for more filtering and pagination options.
-              </p>
-            </div>
-            
-            <ProjectList 
-              projects={projects}
-              loading={projectsLoading}
-              onFilterChange={() => {}} // No-op since this is a simplified view
-              onResetFilters={() => {}} // No-op since this is a simplified view
-              totalCount={totalCount}
-            />
-          </TabsContent>
-        </Tabs>
+        <EnhancedDashboard summary={summary} loading={isLoading} />
       </main>
       
       <footer className="border-t bg-white py-6 mt-12">
@@ -76,6 +32,8 @@ const Index = () => {
           <p>&copy; 2025 Gujarat RERA Project Analytics. All rights reserved.</p>
         </div>
       </footer>
-    </div>;
+    </div>
+  );
 };
+
 export default Index;
