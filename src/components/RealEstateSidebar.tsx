@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   SidebarProvider,
   Sidebar,
@@ -14,16 +14,21 @@ import {
   SidebarGroupLabel,
   SidebarFooter,
   SidebarSeparator,
+  SidebarTrigger
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { 
   PieChart, BarChart, Table, Filter, FileText,
-  ChartPie, TrendingUp, CircleDollarSign, LayoutDashboard
+  ChartPie, TrendingUp, CircleDollarSign, LayoutDashboard,
+  LogOut, LogIn, User
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 const RealEstateSidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -33,12 +38,18 @@ const RealEstateSidebar = () => {
     return location.pathname.startsWith(pathPrefix);
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
+
   return (
     <Sidebar>
-      <SidebarHeader>
+      <SidebarHeader className="flex justify-between items-center">
         <div className="flex h-14 items-center px-4 font-semibold tracking-tight text-lg">
           <span className="text-realestate-primary">Gujarat RERA Analytics</span>
         </div>
+        <SidebarTrigger className="mr-2" />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -111,11 +122,12 @@ const RealEstateSidebar = () => {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               
+              {/* Protected routes that require authentication */}
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
                   isActive={isActive("/projects")}
-                  tooltip="Projects"
+                  tooltip="Projects Explorer"
                 >
                   <Link to="/projects">
                     <Table className="h-5 w-5" />
@@ -161,7 +173,7 @@ const RealEstateSidebar = () => {
                 <SidebarMenuButton
                   asChild
                   isActive={isActive("/trends")}
-                  tooltip="Trends"
+                  tooltip="Trend Analysis"
                 >
                   <Link to="/trends">
                     <Filter className="h-5 w-5" />
@@ -175,12 +187,29 @@ const RealEstateSidebar = () => {
       </SidebarContent>
       <SidebarFooter>
         <div className="p-4">
-          <p className="text-xs text-muted-foreground mb-2">
-            Gujarat RERA Project Analytics Dashboard
-          </p>
-          <Button variant="outline" size="sm" className="w-full">
-            Export Data
-          </Button>
+          {user ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <User className="h-4 w-4" />
+                <span className="truncate">{user.email}</span>
+              </div>
+              <Button variant="outline" size="sm" className="w-full flex items-center gap-2" onClick={handleSignOut}>
+                <LogOut className="h-4 w-4" />
+                <span>Sign Out</span>
+              </Button>
+            </div>
+          ) : (
+            <Button variant="outline" size="sm" className="w-full flex items-center gap-2" onClick={() => navigate("/auth")}>
+              <LogIn className="h-4 w-4" />
+              <span>Sign In</span>
+            </Button>
+          )}
+          
+          {user && (
+            <Button variant="outline" size="sm" className="w-full mt-2">
+              Export Data
+            </Button>
+          )}
         </div>
       </SidebarFooter>
     </Sidebar>

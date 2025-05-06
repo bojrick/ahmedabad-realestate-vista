@@ -13,6 +13,8 @@ import MarketOverview from "./pages/dashboard/MarketOverview";
 import ProjectPipeline from "./pages/dashboard/ProjectPipeline";
 import FinancialHealth from "./pages/dashboard/FinancialHealth";
 import Performance from "./pages/dashboard/Performance";
+import Auth from "./pages/Auth";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +22,10 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
       <Routes>
+        <Route 
+          path="/auth" 
+          element={<Auth />} 
+        />
         <Route 
           path="/" 
           element={
@@ -60,11 +66,14 @@ const App = () => (
             </AppLayout>
           } 
         />
+        {/* Protected Routes */}
         <Route 
           path="/projects" 
           element={
             <AppLayout>
-              <Projects />
+              <ProtectedRoute>
+                <Projects />
+              </ProtectedRoute>
             </AppLayout>
           } 
         />
@@ -72,7 +81,9 @@ const App = () => (
           path="/projects/:id" 
           element={
             <AppLayout>
-              <ProjectDetail />
+              <ProtectedRoute>
+                <ProjectDetail />
+              </ProtectedRoute>
             </AppLayout>
           } 
         />
@@ -80,7 +91,9 @@ const App = () => (
           path="/reports" 
           element={
             <AppLayout>
-              <Reports />
+              <ProtectedRoute>
+                <Reports />
+              </ProtectedRoute>
             </AppLayout>
           } 
         />
@@ -88,7 +101,9 @@ const App = () => (
           path="/market-analysis" 
           element={
             <AppLayout>
-              <MarketAnalysis />
+              <ProtectedRoute>
+                <MarketAnalysis />
+              </ProtectedRoute>
             </AppLayout>
           } 
         />
@@ -96,7 +111,9 @@ const App = () => (
           path="/trends" 
           element={
             <AppLayout>
-              <TrendAnalysis />
+              <ProtectedRoute>
+                <TrendAnalysis />
+              </ProtectedRoute>
             </AppLayout>
           } 
         />
