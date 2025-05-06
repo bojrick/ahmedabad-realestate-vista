@@ -1,4 +1,3 @@
-
 export interface ProjectLocation {
   latitude: number;
   longitude: number;
@@ -40,6 +39,8 @@ export interface ProjectData {
     start: Date | null;
     completion: Date | null;
     lastUpdated: Date | null;
+    submission: string | null;
+    lastSale: string | null;
   };
 }
 

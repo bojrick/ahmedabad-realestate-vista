@@ -40,16 +40,27 @@ export const formatPercentage = (value: number, decimalPlaces: number = 1): stri
 
 /**
  * Format date values for display
- * @param date Date object or string
+ * @param date Date object or string or null
  * @returns Formatted date string
  */
 export const formatDate = (date: Date | string | null): string => {
   if (!date) return 'N/A';
   
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return dateObj.toLocaleDateString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric'
-  });
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    
+    // Check if the date is valid
+    if (isNaN(dateObj.getTime())) {
+      return 'Invalid Date';
+    }
+    
+    return dateObj.toLocaleDateString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return date.toString() || 'N/A';
+  }
 };

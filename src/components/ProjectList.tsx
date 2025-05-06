@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { 
   Pagination, 
   PaginationContent, 
@@ -22,7 +21,6 @@ interface ProjectListProps {
   loading: boolean;
   onFilterChange: (filters: ProjectFilters) => void;
   onResetFilters: () => void;
-  viewType?: "table";
   totalCount?: number;
   currentPage?: number;
   onPageChange?: (page: number) => void;
@@ -35,7 +33,6 @@ const ProjectList: React.FC<ProjectListProps> = ({
   loading, 
   onFilterChange, 
   onResetFilters,
-  viewType = "table",
   totalCount = 0,
   currentPage = 1,
   onPageChange,
@@ -127,7 +124,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
   };
 
   return (
-    <div>
+    <div className="w-full">
       <div className="flex flex-col md:flex-row items-center gap-4 mb-6">
         <div className="relative flex-1 w-full">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
@@ -161,7 +158,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
       {showFilters && (
         <Card className="mb-6">
           <CardContent className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Project Type</label>
                 <Select 
@@ -218,24 +215,6 @@ const ProjectList: React.FC<ProjectListProps> = ({
                   </SelectContent>
                 </Select>
               </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Project Progress</label>
-                <Slider 
-                  defaultValue={[0, 100]} 
-                  min={0} 
-                  max={100} 
-                  step={1}
-                  onValueChange={(value) => {
-                    handleFilterChange('minProgress', value[0]);
-                    handleFilterChange('maxProgress', value[1]);
-                  }} 
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{filters.minProgress || 0}%</span>
-                  <span>{filters.maxProgress || 100}%</span>
-                </div>
-              </div>
             </div>
           </CardContent>
         </Card>
@@ -251,7 +230,9 @@ const ProjectList: React.FC<ProjectListProps> = ({
           <p className="text-muted-foreground">Try adjusting your filters or search terms</p>
         </div>
       ) : (
-        <ProjectTable projects={filteredProjects} />
+        <div className="w-full overflow-hidden">
+          <ProjectTable projects={filteredProjects} />
+        </div>
       )}
       
       {/* Pagination */}

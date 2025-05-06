@@ -59,7 +59,7 @@ const Projects = () => {
   const paginatedProjects = projects.slice(startIndex, endIndex);
 
   return (
-    <div>
+    <div className="w-full">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-realestate-primary mb-2">
           Projects Explorer
@@ -67,19 +67,6 @@ const Projects = () => {
         <p className="text-muted-foreground">
           Browse and filter through all registered RERA projects
         </p>
-      </div>
-      
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <Button variant="outline" size="sm">
-            <Filter className="mr-1 h-4 w-4" />
-            Advanced Filters
-          </Button>
-          <Button variant="outline" size="sm">
-            <MapPin className="mr-1 h-4 w-4" />
-            Map View
-          </Button>
-        </div>
       </div>
       
       {isLoading ? (
@@ -93,7 +80,6 @@ const Projects = () => {
           loading={isLoading}
           onFilterChange={handleFilterChange}
           onResetFilters={resetFilters}
-          viewType="table"
           totalCount={totalCount}
           currentPage={currentPage}
           onPageChange={handlePageChange}
