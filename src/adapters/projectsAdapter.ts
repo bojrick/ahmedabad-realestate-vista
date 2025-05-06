@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectData, ProjectSummary, ProjectLocation, getProjectStatusFromProgress } from "@/types/project";
 
@@ -76,9 +77,7 @@ export function transformProjectData(rawProject: any): ProjectData {
     dates: {
       start: rawProject.startdate ? new Date(rawProject.startdate) : null,
       completion: rawProject.completiondate ? new Date(rawProject.completiondate) : null,
-      lastUpdated: rawProject.data_updated_at ? new Date(rawProject.data_updated_at) : null,
-      submission: rawProject.rerasubmissiondate || null,
-      lastSale: rawProject.last_sale_date || null
+      lastUpdated: rawProject.data_updated_at ? new Date(rawProject.data_updated_at) : null
     }
   };
 }

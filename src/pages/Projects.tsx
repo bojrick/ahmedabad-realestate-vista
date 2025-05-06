@@ -7,12 +7,10 @@ import { useProjectsQuery } from "@/hooks/useProjectsQuery";
 import ProjectList from "@/components/ProjectList";
 import { ProjectFilters } from "@/types/project";
 import { Filter, MapPin, Loader } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
 
 const Projects = () => {
   const [filters, setFilters] = useState<ProjectFilters>({});
   const [currentPage, setCurrentPage] = useState(1);
-  const { user } = useAuth();
   
   const {
     projects,
@@ -69,11 +67,6 @@ const Projects = () => {
         <p className="text-muted-foreground">
           Browse and filter through all registered RERA projects
         </p>
-        {user && (
-          <p className="text-sm text-realestate-primary mt-2">
-            Welcome, {user.email}! You have full access to project data.
-          </p>
-        )}
       </div>
       
       {isLoading ? (
