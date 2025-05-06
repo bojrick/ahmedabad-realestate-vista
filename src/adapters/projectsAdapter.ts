@@ -1,5 +1,6 @@
+
 import { supabase } from "@/integrations/supabase/client";
-import { ProjectData, ProjectSummary, ProjectLocation } from "@/types/project";
+import { ProjectData, ProjectSummary, ProjectLocation, getProjectStatusFromProgress } from "@/types/project";
 
 /**
  * Fetches projects from the database
@@ -127,11 +128,30 @@ export function calculateProjectsSummary(projects: ProjectData[]): ProjectSummar
     projectsByType[type] = (projectsByType[type] || 0) + 1;
   });
   
-  // Group by status
-  const projectsByStatus: Record<string, number> = {};
+  // Group by status using the new classification
+  const projectsByStatus: Record<string, number> = {
+    'Active': 0,
+    'Completed': 0,
+    'Delayed': 0,
+    'Unreported': 0
+  };
+  
   projects.forEach(p => {
-    const status = p.status || 'Unknown';
-    projectsByStatus[status] = (projectsByStatus[status] || 0) + 1;
+    const statusClass = getProjectStatusFromProgress(p.status);
+    switch(statusClass) {
+      case 'active':
+        projectsByStatus['Active'] = (projectsByStatus['Active'] || 0) + 1;
+        break;
+      case 'completed':
+        projectsByStatus['Completed'] = (projectsByStatus['Completed'] || 0) + 1;
+        break;
+      case 'delayed':
+        projectsByStatus['Delayed'] = (projectsByStatus['Delayed'] || 0) + 1;
+        break;
+      case 'unreported':
+        projectsByStatus['Unreported'] = (projectsByStatus['Unreported'] || 0) + 1;
+        break;
+    }
   });
   
   // Group by location - limit to top locations for performance
