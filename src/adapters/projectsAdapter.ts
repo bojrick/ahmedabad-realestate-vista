@@ -47,11 +47,13 @@ export function transformProjectData(rawProject: any): ProjectData {
     id: rawProject.projectregid?.toString() || '',
     name: rawProject.projectname || 'Unnamed Project',
     promoter: rawProject.promotername || 'Unknown Promoter',
+    promoterType: rawProject.promotertype || 'Unknown',
     type: rawProject.projecttype || 'Unknown',
     status: rawProject.projectstatus || 'Unknown',
     progress: parseFloat(rawProject.projectprogress) || 0,
     address: rawProject.projectaddress || '',
     location: rawProject.distname || '',
+    description: rawProject.projectdesc || '',
     coordinates,
     area: {
       total: rawProject.totareaofland || 0,

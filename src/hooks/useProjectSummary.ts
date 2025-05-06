@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectSummary, getProjectStatusFromProgress } from "@/types/project";
@@ -432,15 +431,16 @@ async function collectProjectSummaryData(
   return {
     // Market Overview
     totalProjects: totalProjects,
+    totalValue: totalValue,
+    totalArea: totalArea || 0,
+    avgBookingPercentage: avgBookingPercentage,
+    avgProgress: avgProgress,
     activeProjects: activeProjects,
     completedProjects: completedProjects,
     delayedProjects: delayedProjects,
     unreportedProjects: unreportedProjects,
-    totalValue: totalValue,
     totalSpend: totalSpend,
-    avgBookingPercentage: avgBookingPercentage,
     avgCollectionPercentage: avgCollectionPercentage,
-    avgProgress: avgProgress,
     
     // Year over Year changes
     yoyChanges: yoyChanges,
@@ -486,11 +486,15 @@ async function collectProjectSummaryData(
     
     // Geographic Distribution
     projectsByLocation: sortedLocations,
-    avgBookingByLocation: avgBookingByLocation,
-    yoyProjectsByLocation: yoyProjectsByLocation,
+    
+    // Add required properties from the ProjectSummary interface
+    financialSummary: {
+      totalValue: totalValue,
+      receivedAmount: totalRevenue,
+      avgCollectionPercentage: avgCollectionPercentage
+    },
     
     // Consultant & Promoter Insights
-    topPromoters: top10Promoters,
     avgArchScore: avgArchScore,
     avgEngScore: avgEngScore,
     yoyAvgArchScore: yoyAvgArchScore,

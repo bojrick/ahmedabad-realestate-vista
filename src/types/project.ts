@@ -1,3 +1,4 @@
+
 export interface ProjectLocation {
   latitude: number;
   longitude: number;
@@ -40,6 +41,8 @@ export interface ProjectData {
     submission: string | null;
     lastSale: string | null;
   };
+  promoterType?: string;
+  description?: string;
 }
 
 export interface ProjectSummary {
@@ -56,6 +59,53 @@ export interface ProjectSummary {
     receivedAmount: number;
     avgCollectionPercentage: number;
   };
+  // Additional properties used in dashboard components
+  activeProjects?: number;
+  completedProjects?: number;
+  delayedProjects?: number;
+  unreportedProjects?: number;
+  totalSpend?: number;
+  avgCollectionPercentage?: number;
+  yoyChanges?: {
+    totalProjects?: number;
+    activeProjects?: number;
+    completedProjects?: number;
+    totalValue?: number;
+    avgBookingPercentage?: number;
+    avgProgress?: number;
+  };
+  financials?: {
+    landCost: number;
+    developmentCost: number;
+    taxesAndPremiums: number;
+    interestCharges: number;
+    netCashFlow: number;
+    avgCostVariance: number;
+    yoyLandCost: number;
+    yoyDevelopmentCost: number;
+    yoyCostVariance: number;
+  };
+  salesPerformance?: {
+    totalUnits: number;
+    bookedUnits: number;
+    totalValue: number;
+    receivedAmount: number;
+    avgCollectionPercentage: number;
+    revenuePerUnit: number;
+    yoyBookedUnits: number;
+    yoyReceivedAmount: number;
+    yoyCollectionPercentage: number;
+  };
+  projectVelocity?: {
+    avgProjectDuration: number;
+    yoyAvgProjectDuration: number;
+    completedOnTime: number;
+    completedDelayed: number;
+  };
+  avgArchScore?: number;
+  avgEngScore?: number;
+  yoyAvgArchScore?: number;
+  yoyAvgEngScore?: number;
 }
 
 export interface ProjectFilters {
@@ -64,6 +114,11 @@ export interface ProjectFilters {
   location?: string[];
   minProgress?: number;
   maxProgress?: number;
+  // Add missing filter properties
+  minPrice?: number;
+  maxPrice?: number;
+  minArea?: number;
+  maxArea?: number;
 }
 
 export type ProjectStatus = 'active' | 'completed' | 'delayed' | 'unreported';
