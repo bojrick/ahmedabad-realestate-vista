@@ -135,62 +135,58 @@ export const useProjectSummaryQuery = () => {
         if (progressError) throw progressError;
         const avgProgress = avgProgressData || 0;
         
-        // Fetch distribution data for charts using direct queries
+        // Fetch distribution data for charts using direct queries with counts
         // Get project types distribution
         const { data: typeData, error: typeError } = await supabase
           .from('gujrera_projects_detailed_summary')
-          .select('projecttype, count')
-          .not('projecttype', 'is', null)
-          // The groupBy method isn't available in the current Supabase JS client version
-          // Use select with count as an aggregate instead
-          .select(`
-            projecttype,
-            count:count(*)
-          `)
-          .group('projecttype');
-        
+          .select('projecttype, count:projecttype')
+          .not('projecttype', 'is', null);
+          
+        // Since .group() is not available, we'll handle counts client-side
         if (typeError) throw typeError;
         
         const projectsByType: Record<string, number> = {};
         typeData.forEach((item: any) => {
-          projectsByType[item.projecttype || 'Unknown'] = parseInt(item.count);
+          const type = item.projecttype || 'Unknown';
+          projectsByType[type] = (projectsByType[type] || 0) + 1;
         });
         
         // Get project statuses distribution
         const { data: statusData, error: statusError } = await supabase
           .from('gujrera_projects_detailed_summary')
-          .select(`
-            projectstatus,
-            count:count(*)
-          `)
-          .not('projectstatus', 'is', null)
-          .group('projectstatus');
-        
+          .select('projectstatus')
+          .not('projectstatus', 'is', null);
+          
         if (statusError) throw statusError;
         
         const projectsByStatus: Record<string, number> = {};
         statusData.forEach((item: any) => {
-          projectsByStatus[item.projectstatus || 'Unknown'] = parseInt(item.count);
+          const status = item.projectstatus || 'Unknown';
+          projectsByStatus[status] = (projectsByStatus[status] || 0) + 1;
         });
         
         // Get project locations distribution
         const { data: locationData, error: locationError } = await supabase
           .from('gujrera_projects_detailed_summary')
-          .select(`
-            distname,
-            count:count(*)
-          `)
-          .not('distname', 'is', null)
-          .group('distname')
-          .order('count', { ascending: false })
-          .limit(15);
+          .select('distname')
+          .not('distname', 'is', null);
         
         if (locationError) throw locationError;
         
         const projectsByLocation: Record<string, number> = {};
         locationData.forEach((item: any) => {
-          projectsByLocation[item.distname || 'Unknown'] = parseInt(item.count);
+          const location = item.distname || 'Unknown';
+          projectsByLocation[location] = (projectsByLocation[location] || 0) + 1;
         });
+        
+        // Sort and limit locations to top 15
+        const sortedLocations = Object.entries(projectsByLocation)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 15)
+          .reduce<Record<string, number>>((acc, [key, value]) => {
+            acc[key] = value;
+            return acc;
+          }, {});
         
         // Get financial summary using RPC functions
         const { data: receivedAmountData, error: receivedError } = await supabase
@@ -215,7 +211,7 @@ export const useProjectSummaryQuery = () => {
           avgProgress: avgProgress,
           projectsByType: projectsByType,
           projectsByStatus: projectsByStatus,
-          projectsByLocation: projectsByLocation,
+          projectsByLocation: sortedLocations,
           financialSummary: {
             totalValue: totalValue,
             receivedAmount: receivedAmount,
