@@ -17,11 +17,11 @@ interface ProjectTableProps {
   projects: ProjectData[];
 }
 
-type SortField = keyof ProjectData | 'financials.totalValue' | 'area.total' | 'units.total';
+type SortField = keyof ProjectData | 'financials.totalValue' | 'dates.submission';
 
 const ProjectTable: React.FC<ProjectTableProps> = ({ projects }) => {
-  const [sortField, setSortField] = React.useState<SortField | null>(null);
-  const [sortDirection, setSortDirection] = React.useState<"asc" | "desc">("asc");
+  const [sortField, setSortField] = React.useState<SortField>('dates.submission');
+  const [sortDirection, setSortDirection] = React.useState<"asc" | "desc">("desc");
   
   // Helper function to format currency values
   const formatCurrency = (amount: number): string => {
@@ -31,6 +31,21 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ projects }) => {
       return `₹${(amount / 100000).toFixed(2)} Lac`;
     } else {
       return `₹${amount.toLocaleString()}`;
+    }
+  };
+  
+  // Format date for display
+  const formatDate = (dateString: string | null): string => {
+    if (!dateString) return "N/A";
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-IN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (e) {
+      return dateString || "N/A";
     }
   };
   
@@ -49,7 +64,7 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ projects }) => {
     return keys.reduce((obj, key) => obj && obj[key] !== undefined ? obj[key] : null, object);
   };
 
-  // Basic sorting functionality
+  // Sort projects by rerasubmissiondate (dates.submission) by default
   const sortedProjects = [...projects].sort((a, b) => {
     if (!sortField) return 0;
     
@@ -65,6 +80,18 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ projects }) => {
       fieldB = b[sortField as keyof ProjectData];
     }
     
+    // Handle null or undefined values
+    if (fieldA === null || fieldA === undefined) return sortDirection === "asc" ? -1 : 1;
+    if (fieldB === null || fieldB === undefined) return sortDirection === "asc" ? 1 : -1;
+    
+    // Handle date comparison
+    if (sortField === 'dates.submission' || sortField === 'dates.lastSale') {
+      const dateA = fieldA ? new Date(fieldA).getTime() : 0;
+      const dateB = fieldB ? new Date(fieldB).getTime() : 0;
+      return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+    }
+    
+    // Default comparison
     if (fieldA < fieldB) return sortDirection === "asc" ? -1 : 1;
     if (fieldA > fieldB) return sortDirection === "asc" ? 1 : -1;
     return 0;
@@ -91,10 +118,32 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ projects }) => {
             <TableHead>Location</TableHead>
             <TableHead
               className="cursor-pointer"
-              onClick={() => handleSort("progress")}
+              onClick={() => handleSort("units.bookingPercentage")}
             >
-              Progress
-              {sortField === "progress" && (
+              Booking %
+              {sortField === "units.bookingPercentage" && (
+                sortDirection === "asc" ? 
+                <ArrowUp className="ml-1 h-4 w-4 inline" /> : 
+                <ArrowDown className="ml-1 h-4 w-4 inline" />
+              )}
+            </TableHead>
+            <TableHead 
+              className="cursor-pointer"
+              onClick={() => handleSort("dates.submission")}
+            >
+              Submission Date
+              {sortField === "dates.submission" && (
+                sortDirection === "asc" ? 
+                <ArrowUp className="ml-1 h-4 w-4 inline" /> : 
+                <ArrowDown className="ml-1 h-4 w-4 inline" />
+              )}
+            </TableHead>
+            <TableHead 
+              className="cursor-pointer"
+              onClick={() => handleSort("dates.lastSale")}
+            >
+              Last Sale Date
+              {sortField === "dates.lastSale" && (
                 sortDirection === "asc" ? 
                 <ArrowUp className="ml-1 h-4 w-4 inline" /> : 
                 <ArrowDown className="ml-1 h-4 w-4 inline" />
@@ -131,15 +180,11 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ projects }) => {
               <TableCell>{project.location}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <div className="w-full max-w-24 bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full"
-                      style={{ width: `${project.progress}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-xs">{project.progress}%</span>
+                  <span className="text-xs">{project.units.bookingPercentage || 0}%</span>
                 </div>
               </TableCell>
+              <TableCell>{formatDate(project.dates.submission)}</TableCell>
+              <TableCell>{formatDate(project.dates.lastSale)}</TableCell>
               <TableCell className="text-right">
                 {formatCurrency(project.financials.totalValue)}
               </TableCell>

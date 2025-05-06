@@ -1,16 +1,14 @@
 
 import React, { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useProjectsQuery } from "@/hooks/useProjectsQuery";
 import ProjectList from "@/components/ProjectList";
 import { ProjectFilters } from "@/types/project";
-import { MapPin, Filter, Table, List, Loader } from "lucide-react";
+import { Filter, MapPin, Loader } from "lucide-react";
 
 const Projects = () => {
-  const [viewType, setViewType] = useState<"list" | "table">("list");
   const [filters, setFilters] = useState<ProjectFilters>({});
   const [currentPage, setCurrentPage] = useState(1);
   
@@ -72,25 +70,6 @@ const Projects = () => {
       </div>
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <div className="flex items-center gap-2">
-          <Button 
-            variant={viewType === "list" ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setViewType("list")}
-          >
-            <List className="mr-1 h-4 w-4" />
-            Cards
-          </Button>
-          <Button 
-            variant={viewType === "table" ? "default" : "outline"}
-            size="sm" 
-            onClick={() => setViewType("table")}
-          >
-            <Table className="mr-1 h-4 w-4" />
-            Table
-          </Button>
-        </div>
-        
         <div className="flex items-center gap-2 w-full md:w-auto">
           <Button variant="outline" size="sm">
             <Filter className="mr-1 h-4 w-4" />
@@ -114,7 +93,7 @@ const Projects = () => {
           loading={isLoading}
           onFilterChange={handleFilterChange}
           onResetFilters={resetFilters}
-          viewType={viewType}
+          viewType="table"
           totalCount={totalCount}
           currentPage={currentPage}
           onPageChange={handlePageChange}

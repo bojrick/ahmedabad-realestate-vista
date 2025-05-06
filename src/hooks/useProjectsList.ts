@@ -39,8 +39,6 @@ export const useProjectsQuery = (filters: ProjectFilters = {}) => {
       baseQuery = baseQuery.lte('projectprogress', filters.maxProgress);
     }
     
-    // Add other filters as needed
-    
     return baseQuery;
   };
   
@@ -52,10 +50,10 @@ export const useProjectsQuery = (filters: ProjectFilters = {}) => {
         // Prepare base query with filters
         const query = prepareQuery(supabase);
         
-        // Add pagination
+        // Add pagination and sort by rerasubmissiondate in descending order
         const { data, error, count } = await query
           .range(pageParam * PAGE_SIZE, (pageParam + 1) * PAGE_SIZE - 1)
-          .order('projectregid', { ascending: false });
+          .order('rerasubmissiondate', { ascending: false, nullsLast: true });
         
         if (error) throw error;
         

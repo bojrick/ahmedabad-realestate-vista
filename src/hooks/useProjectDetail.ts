@@ -14,10 +14,17 @@ export const useProjectDetailQuery = (id: string) => {
     queryKey: ['project', id],
     queryFn: async () => {
       try {
+        // Convert string id to number for the query
+        const numericId = parseInt(id, 10);
+        
+        if (isNaN(numericId)) {
+          throw new Error("Invalid project ID");
+        }
+        
         const { data, error } = await supabase
           .from('gujrera_projects_detailed_summary')
           .select('*')
-          .eq('projectregid', id) // Use the string ID directly without conversion
+          .eq('projectregid', numericId)
           .single();
           
         if (error) throw error;

@@ -1,11 +1,9 @@
-
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Separator } from "@/components/ui/separator";
 import { 
   Pagination, 
   PaginationContent, 
@@ -17,7 +15,6 @@ import {
 } from "@/components/ui/pagination";
 import { Search, Filter, ChevronDown, ChevronUp } from "lucide-react";
 import { ProjectData, ProjectFilters } from "@/types/project";
-import ProjectCard from "./ProjectCard";
 import ProjectTable from "./ProjectTable";
 
 interface ProjectListProps {
@@ -25,7 +22,7 @@ interface ProjectListProps {
   loading: boolean;
   onFilterChange: (filters: ProjectFilters) => void;
   onResetFilters: () => void;
-  viewType?: "list" | "table";
+  viewType?: "table";
   totalCount?: number;
   currentPage?: number;
   onPageChange?: (page: number) => void;
@@ -38,7 +35,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
   loading, 
   onFilterChange, 
   onResetFilters,
-  viewType = "list",
+  viewType = "table",
   totalCount = 0,
   currentPage = 1,
   onPageChange,
@@ -254,17 +251,7 @@ const ProjectList: React.FC<ProjectListProps> = ({
           <p className="text-muted-foreground">Try adjusting your filters or search terms</p>
         </div>
       ) : (
-        <>
-          {viewType === "list" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProjects.map(project => (
-                <ProjectCard key={project.id} project={project} />
-              ))}
-            </div>
-          ) : (
-            <ProjectTable projects={filteredProjects} />
-          )}
-        </>
+        <ProjectTable projects={filteredProjects} />
       )}
       
       {/* Pagination */}
