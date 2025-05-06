@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProjectSummaryQuery, useProjectsQuery } from "@/hooks/useProjectsQuery";
-import Navbar from "@/components/Navbar";
 import EnhancedDashboard from "@/components/EnhancedDashboard";
 import ProjectList from "@/components/ProjectList";
 
@@ -34,8 +33,6 @@ const Index = () => {
   }
   
   return <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
       <main className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-realestate-primary">
