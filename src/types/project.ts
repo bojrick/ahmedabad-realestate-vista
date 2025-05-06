@@ -42,15 +42,58 @@ export interface ProjectData {
 }
 
 export interface ProjectSummary {
+  // Market Overview
   totalProjects: number;
+  activeProjects?: number;
+  completedProjects?: number; 
   totalValue: number;
-  totalArea: number;
+  totalSpend?: number;
   avgBookingPercentage: number;
+  avgCollectionPercentage?: number;
   avgProgress: number;
-  projectsByType: Record<string, number>;
+  
+  // Project Pipeline
   projectsByStatus: Record<string, number>;
+  projectsByType: Record<string, number>;
+  projectsByPromoterType?: Record<string, number>;
+  
+  // Financial Health
+  financials?: {
+    landCost: number;
+    developmentCost: number;
+    taxesAndPremiums: number;
+    interestCharges: number;
+    netCashFlow: number;
+    avgCostVariance: number; // percentage
+  };
+  
+  // Sales & Booking Performance
+  salesPerformance?: {
+    totalUnits: number;
+    bookedUnits: number;
+    totalValue: number;
+    receivedAmount: number;
+    avgCollectionPercentage: number;
+    revenuePerUnit: number;
+  };
+  
+  // Project Velocity
+  projectVelocity?: {
+    avgProjectDuration: number; // in days
+  };
+  
+  // Geographic Distribution
   projectsByLocation: Record<string, number>;
-  financialSummary: {
+  avgBookingByLocation?: Record<string, number>;
+  
+  // Consultant & Promoter Insights
+  topPromoters?: Record<string, number>;
+  avgArchScore?: number;
+  avgEngScore?: number;
+  
+  // Legacy fields for backward compatibility
+  totalArea?: number;
+  financialSummary?: {
     totalValue: number;
     receivedAmount: number;
     avgCollectionPercentage: number;

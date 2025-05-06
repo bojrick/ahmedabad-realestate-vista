@@ -1,48 +1,87 @@
 
 import React from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { formatCurrency } from "@/utils/formatters";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
 interface ProjectValueChartProps {
   totalValue: number;
   receivedAmount: number;
+  labelA?: string;
+  labelB?: string;
+  isNumeric?: boolean;
 }
 
-const ProjectValueChart: React.FC<ProjectValueChartProps> = ({ totalValue, receivedAmount }) => {
-  const remainingAmount = totalValue - receivedAmount;
-  
-  // Optimize data structure for the chart
-  const chartData = [
-    {
-      name: "Project Value",
-      Total: totalValue,
-      Received: receivedAmount,
-      Remaining: remainingAmount
+const ProjectValueChart: React.FC<ProjectValueChartProps> = ({ 
+  totalValue, 
+  receivedAmount,
+  labelA = "Total Value",
+  labelB = "Received Amount",
+  isNumeric = false
+}) => {
+  // Format values for display
+  const formatValue = (value: number) => {
+    if (isNumeric) {
+      return value.toLocaleString();
     }
-  ];
+    
+    if (value >= 10000000) {
+      return `₹${(value / 10000000).toFixed(2)} Cr`;
+    } else if (value >= 100000) {
+      return `₹${(value / 100000).toFixed(2)} Lac`;
+    } else {
+      return `₹${value.toLocaleString()}`;
+    }
+  };
 
-  // Custom tooltip formatter
-  const tooltipFormatter = (value: number) => [formatCurrency(value), 'Amount'];
+  // Calculate the remaining value
+  const remainingValue = totalValue - receivedAmount;
   
-  // Custom label formatter for the Y-axis
-  const axisLabelFormatter = (value: number) => formatCurrency(value, false);
+  // Prevent negative values
+  const safeRemainingValue = Math.max(0, remainingValue);
+  const safeReceivedAmount = Math.max(0, receivedAmount);
+  
+  // Prepare chart data
+  const chartData = [
+    { name: labelB, value: safeReceivedAmount },
+    { name: `Remaining ${labelA}`, value: safeRemainingValue }
+  ];
+  
+  // Calculate percentage
+  const percentage = totalValue > 0 ? (receivedAmount / totalValue) * 100 : 0;
+  
+  // Chart colors
+  const COLORS = ['#3182ce', '#e2e8f0'];
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart
-        data={chartData}
-        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis tickFormatter={axisLabelFormatter} />
-        <Tooltip formatter={tooltipFormatter} />
-        <Legend />
-        <Bar dataKey="Total" name="Total Value" fill="#1a365d" />
-        <Bar dataKey="Received" name="Received Amount" fill="#38a169" />
-        <Bar dataKey="Remaining" name="Remaining Amount" fill="#e67e22" />
-      </BarChart>
-    </ResponsiveContainer>
+    <div className="flex flex-col items-center w-full h-full">
+      <ResponsiveContainer width="100%" height="80%">
+        <PieChart>
+          <Pie
+            data={chartData}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            outerRadius={80}
+            fill="#8884d8"
+            dataKey="value"
+            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+          >
+            {chartData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Tooltip 
+            formatter={(value) => [formatValue(value as number), isNumeric ? "Count" : "Amount"]}
+          />
+          <Legend />
+        </PieChart>
+      </ResponsiveContainer>
+      
+      <div className="mt-4 text-center">
+        <p className="text-sm text-muted-foreground">
+          {labelB}: {formatValue(receivedAmount)} of {formatValue(totalValue)} ({percentage.toFixed(1)}%)
+        </p>
+      </div>
+    </div>
   );
 };
 
