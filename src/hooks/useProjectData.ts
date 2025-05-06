@@ -54,19 +54,19 @@ export const useProjectData = () => {
       filtered = filtered.filter(p => filters.location!.includes(p.location));
     }
     
-    if (filters.minPrice !== undefined) {
+    if (filters.minPrice) {
       filtered = filtered.filter(p => p.financials.totalValue >= filters.minPrice!);
     }
     
-    if (filters.maxPrice !== undefined) {
+    if (filters.maxPrice) {
       filtered = filtered.filter(p => p.financials.totalValue <= filters.maxPrice!);
     }
     
-    if (filters.minArea !== undefined) {
+    if (filters.minArea) {
       filtered = filtered.filter(p => p.area.total >= filters.minArea!);
     }
     
-    if (filters.maxArea !== undefined) {
+    if (filters.maxArea) {
       filtered = filtered.filter(p => p.area.total <= filters.maxArea!);
     }
 

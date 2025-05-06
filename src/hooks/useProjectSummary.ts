@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectSummary, getProjectStatusFromProgress } from "@/types/project";
@@ -53,13 +54,6 @@ export const useProjectSummaryQuery = () => {
         
         if (valueError) throw valueError;
         const totalValue = totalValueData || 0;
-        
-        // Get total area
-        const { data: totalAreaData, error: areaError } = await supabase
-          .rpc('get_total_area_of_land');
-        
-        if (areaError) throw areaError;
-        const totalArea = totalAreaData || 0;
         
         // Get total actual spend
         const { data: totalSpendData, error: spendError } = await supabase
@@ -120,7 +114,6 @@ export const useProjectSummaryQuery = () => {
           delayedProjects,
           unreportedProjects,
           totalValue, 
-          totalArea,  // Pass totalArea parameter here
           totalSpend, 
           avgBookingPercentage, 
           avgCollectionPercentage, 
@@ -151,7 +144,6 @@ async function collectProjectSummaryData(
   delayedProjects: number,
   unreportedProjects: number,
   totalValue: number,
-  totalArea: number,  // Add totalArea parameter
   totalSpend: number,
   avgBookingPercentage: number,
   avgCollectionPercentage: number,
@@ -398,7 +390,7 @@ async function collectProjectSummaryData(
   });
   
   // Sort and get top 10 promoters
-  const topPromoters = Object.entries(projectsByPromoter)
+  const top10Promoters = Object.entries(projectsByPromoter)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10)
     .reduce<Record<string, number>>((acc, [key, value]) => {
@@ -440,16 +432,15 @@ async function collectProjectSummaryData(
   return {
     // Market Overview
     totalProjects: totalProjects,
-    totalValue: totalValue,
-    totalArea: totalArea,  // Use the totalArea parameter
-    avgBookingPercentage: avgBookingPercentage,
-    avgProgress: avgProgress,
     activeProjects: activeProjects,
     completedProjects: completedProjects,
     delayedProjects: delayedProjects,
     unreportedProjects: unreportedProjects,
+    totalValue: totalValue,
     totalSpend: totalSpend,
+    avgBookingPercentage: avgBookingPercentage,
     avgCollectionPercentage: avgCollectionPercentage,
+    avgProgress: avgProgress,
     
     // Year over Year changes
     yoyChanges: yoyChanges,
@@ -457,8 +448,7 @@ async function collectProjectSummaryData(
     // Project Pipeline
     projectsByStatus: projectsByStatus,
     projectsByType: projectsByType,
-    projectsByPromoterType: projectsByPromoterType,  // Include promoter type
-    topPromoters: topPromoters,  // Include top promoters
+    projectsByPromoterType: projectsByPromoterType,
     
     // Financial Health
     financials: {
@@ -496,15 +486,11 @@ async function collectProjectSummaryData(
     
     // Geographic Distribution
     projectsByLocation: sortedLocations,
-    
-    // Add required properties from the ProjectSummary interface
-    financialSummary: {
-      totalValue: totalValue,
-      receivedAmount: totalRevenue,
-      avgCollectionPercentage: avgCollectionPercentage
-    },
+    avgBookingByLocation: avgBookingByLocation,
+    yoyProjectsByLocation: yoyProjectsByLocation,
     
     // Consultant & Promoter Insights
+    topPromoters: top10Promoters,
     avgArchScore: avgArchScore,
     avgEngScore: avgEngScore,
     yoyAvgArchScore: yoyAvgArchScore,
