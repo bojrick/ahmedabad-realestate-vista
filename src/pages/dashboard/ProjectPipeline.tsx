@@ -73,7 +73,7 @@ const ProjectPipeline = () => {
                       {promoter}
                     </div>
                     <div className="ml-4 text-right font-mono">
-                      {count} projects
+                      {count.toString()} projects
                     </div>
                   </div>
                 ))

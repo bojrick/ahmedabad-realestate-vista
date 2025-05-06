@@ -54,12 +54,14 @@ export interface ProjectSummary {
   projectsByType: Record<string, number>;
   projectsByStatus: Record<string, number>;
   projectsByLocation: Record<string, number>;
+  projectsByPromoterType?: Record<string, number>;
+  topPromoters?: Record<string, number>;
   financialSummary: {
     totalValue: number;
     receivedAmount: number;
     avgCollectionPercentage: number;
   };
-  // Additional properties used in dashboard components
+  // Dashboard components specific properties
   activeProjects?: number;
   completedProjects?: number;
   delayedProjects?: number;
@@ -114,7 +116,6 @@ export interface ProjectFilters {
   location?: string[];
   minProgress?: number;
   maxProgress?: number;
-  // Add missing filter properties
   minPrice?: number;
   maxPrice?: number;
   minArea?: number;
