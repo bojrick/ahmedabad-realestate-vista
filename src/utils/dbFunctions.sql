@@ -46,3 +46,11 @@ BEGIN
   RETURN (SELECT SUM(totareaofland) FROM gujrera_projects_detailed_summary);
 END;
 $$ LANGUAGE plpgsql;
+
+-- Function to get total project count
+CREATE OR REPLACE FUNCTION get_total_projects_count()
+RETURNS integer AS $$
+BEGIN
+  RETURN (SELECT COUNT(DISTINCT projectregid) FROM gujrera_projects_detailed_summary);
+END;
+$$ LANGUAGE plpgsql;

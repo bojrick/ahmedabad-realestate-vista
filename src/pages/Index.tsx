@@ -19,7 +19,8 @@ const Index = () => {
   // Get the first 12 projects for the projects tab
   const { 
     projects, 
-    isLoading: projectsLoading 
+    isLoading: projectsLoading,
+    totalCount
   } = useProjectsQuery();
   
   if (isError) {
@@ -67,6 +68,7 @@ const Index = () => {
               loading={projectsLoading}
               onFilterChange={() => {}} // No-op since this is a simplified view
               onResetFilters={() => {}} // No-op since this is a simplified view
+              totalCount={totalCount}
             />
           </TabsContent>
         </Tabs>

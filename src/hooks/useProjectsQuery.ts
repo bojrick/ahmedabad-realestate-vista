@@ -3,7 +3,7 @@ import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectData, ProjectFilters } from "@/types/project";
 import { useToast } from "@/hooks/use-toast";
-import { transformProjectData, calculateProjectsSummary } from "@/adapters/projectsAdapter";
+import { transformProjectData } from "@/adapters/projectsAdapter";
 
 // Number of items to load per page
 const PAGE_SIZE = 12;
@@ -93,7 +93,7 @@ export const useProjectsQuery = (filters: ProjectFilters = {}) => {
     hasNextPage: projectsQuery.hasNextPage,
     fetchNextPage: projectsQuery.fetchNextPage,
     isFetchingNextPage: projectsQuery.isFetchingNextPage,
-    totalCount: TOTAL_PROJECTS_COUNT // Return the known total count
+    totalCount: TOTAL_PROJECTS_COUNT
   };
 };
 
@@ -108,11 +108,11 @@ export const useProjectSummaryQuery = () => {
     queryFn: async () => {
       try {
         // Get total project count using direct query
-        const { count: totalProjectsCount, error: countError } = await supabase
-          .from('gujrera_projects_detailed_summary')
-          .select('*', { count: 'exact', head: true });
+        const { data: countData, error: countError } = await supabase
+          .rpc('get_total_projects_count');
         
         if (countError) throw countError;
+        const totalProjects = countData || TOTAL_PROJECTS_COUNT;
 
         // Get total project value using direct aggregation
         const { data: totalValueData, error: valueError } = await supabase
@@ -139,45 +139,45 @@ export const useProjectSummaryQuery = () => {
         // Get project types distribution
         const { data: typeData, error: typeError } = await supabase
           .from('gujrera_projects_detailed_summary')
-          .select('projecttype, count')
+          .select('projecttype, count(*)')
           .not('projecttype', 'is', null)
-          .group('projecttype');
+          .groupBy('projecttype');
         
         if (typeError) throw typeError;
         
         const projectsByType: Record<string, number> = {};
-        typeData.forEach(item => {
-          projectsByType[item.projecttype || 'Unknown'] = item.count;
+        typeData.forEach((item: any) => {
+          projectsByType[item.projecttype || 'Unknown'] = parseInt(item.count);
         });
         
         // Get project statuses distribution
         const { data: statusData, error: statusError } = await supabase
           .from('gujrera_projects_detailed_summary')
-          .select('projectstatus, count')
+          .select('projectstatus, count(*)')
           .not('projectstatus', 'is', null)
-          .group('projectstatus');
+          .groupBy('projectstatus');
         
         if (statusError) throw statusError;
         
         const projectsByStatus: Record<string, number> = {};
-        statusData.forEach(item => {
-          projectsByStatus[item.projectstatus || 'Unknown'] = item.count;
+        statusData.forEach((item: any) => {
+          projectsByStatus[item.projectstatus || 'Unknown'] = parseInt(item.count);
         });
         
         // Get project locations distribution
         const { data: locationData, error: locationError } = await supabase
           .from('gujrera_projects_detailed_summary')
-          .select('distname, count')
+          .select('distname, count(*)')
           .not('distname', 'is', null)
-          .group('distname')
+          .groupBy('distname')
           .order('count', { ascending: false })
           .limit(15);
         
         if (locationError) throw locationError;
         
         const projectsByLocation: Record<string, number> = {};
-        locationData.forEach(item => {
-          projectsByLocation[item.distname || 'Unknown'] = item.count;
+        locationData.forEach((item: any) => {
+          projectsByLocation[item.distname || 'Unknown'] = parseInt(item.count);
         });
         
         // Get financial summary
@@ -187,11 +187,18 @@ export const useProjectSummaryQuery = () => {
         if (receivedError) throw receivedError;
         const receivedAmount = receivedAmountData || 0;
         
+        // Get total area of land
+        const { data: totalAreaData, error: areaError } = await supabase
+          .rpc('get_total_area_of_land');
+          
+        if (areaError) throw areaError;
+        const totalArea = totalAreaData || 0;
+        
         // Use the actual values from the database for the summary
         return {
-          totalProjects: totalProjectsCount || TOTAL_PROJECTS_COUNT,
+          totalProjects: totalProjects,
           totalValue: totalValue,
-          totalArea: 0, // This would need another aggregation query if needed
+          totalArea: totalArea,
           avgBookingPercentage: avgBookingPercentage,
           avgProgress: avgProgress,
           projectsByType: projectsByType,
