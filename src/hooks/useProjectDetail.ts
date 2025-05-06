@@ -17,7 +17,7 @@ export const useProjectDetailQuery = (id: string) => {
         const { data, error } = await supabase
           .from('gujrera_projects_detailed_summary')
           .select('*')
-          .eq('projectregid', parseInt(id)) // Convert string to number
+          .eq('projectregid', id) // Remove parseInt to avoid conversion issues
           .single();
           
         if (error) throw error;

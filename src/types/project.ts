@@ -8,9 +8,11 @@ export interface ProjectData {
   id: string;
   name: string;
   promoter: string;
+  promoterType?: string;
   type: string;
   status: string;
   progress: number;
+  description?: string;
   address: string;
   location: string;
   coordinates: ProjectLocation | null;

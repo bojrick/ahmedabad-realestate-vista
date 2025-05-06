@@ -1,20 +1,23 @@
+
 import React from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProjectDetailQuery } from "@/hooks/useProjectsQuery";
-import { PieChart, BarChart, FileText, ArrowLeft, Building, MapPin, Calendar } from "lucide-react";
+import { PieChart, BarChart, FileText, ArrowLeft, Building, MapPin, Calendar, Loader } from "lucide-react";
 import ProjectValueChart from "@/components/charts/ProjectValueChart";
 
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { data: project, isLoading, isError, error } = useProjectDetailQuery(id || '');
   
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
+        <Loader className="h-8 w-8 animate-spin text-muted-foreground mr-2" />
         <p>Loading project details...</p>
       </div>
     );
@@ -52,6 +55,17 @@ const ProjectDetail = () => {
       month: 'short',
       year: 'numeric'
     });
+  };
+
+  // Format currency values
+  const formatCurrency = (amount: number) => {
+    if (amount >= 10000000) {
+      return `₹${(amount / 10000000).toFixed(2)} Cr`;
+    } else if (amount >= 100000) {
+      return `₹${(amount / 100000).toFixed(2)} Lac`;
+    } else {
+      return `₹${amount.toLocaleString()}`;
+    }
   };
 
   return (
@@ -92,7 +106,7 @@ const ProjectDetail = () => {
           <CardContent className="p-4">
             <div className="text-muted-foreground text-xs mb-1">Project Value</div>
             <div className="text-xl font-bold">
-              ₹{(project.financials.totalValue / 10000000).toFixed(2)} Cr
+              {formatCurrency(project.financials.totalValue)}
             </div>
           </CardContent>
         </Card>
@@ -171,6 +185,7 @@ const ProjectDetail = () => {
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="financial">Financial Data</TabsTrigger>
+          <TabsTrigger value="units">Units & Area</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
         </TabsList>
         
@@ -191,28 +206,24 @@ const ProjectDetail = () => {
                     <dd className="text-sm font-medium">{project.status}</dd>
                   </div>
                   <div className="grid grid-cols-2">
-                    <dt className="text-sm text-muted-foreground">Total Land Area</dt>
-                    <dd className="text-sm font-medium">{project.area.total.toLocaleString()} sq.m</dd>
+                    <dt className="text-sm text-muted-foreground">Address</dt>
+                    <dd className="text-sm font-medium">{project.address || 'Not specified'}</dd>
                   </div>
                   <div className="grid grid-cols-2">
-                    <dt className="text-sm text-muted-foreground">Total Carpet Area</dt>
-                    <dd className="text-sm font-medium">{project.area.carpet.toLocaleString()} sq.m</dd>
+                    <dt className="text-sm text-muted-foreground">District</dt>
+                    <dd className="text-sm font-medium">{project.location}</dd>
                   </div>
                   <div className="grid grid-cols-2">
-                    <dt className="text-sm text-muted-foreground">Built-up Area</dt>
-                    <dd className="text-sm font-medium">{project.area.built.toLocaleString()} sq.m</dd>
+                    <dt className="text-sm text-muted-foreground">Promoter</dt>
+                    <dd className="text-sm font-medium">{project.promoter}</dd>
                   </div>
                   <div className="grid grid-cols-2">
-                    <dt className="text-sm text-muted-foreground">Total Units</dt>
-                    <dd className="text-sm font-medium">{project.units.total}</dd>
+                    <dt className="text-sm text-muted-foreground">Promoter Type</dt>
+                    <dd className="text-sm font-medium">{project.promoterType || 'Not specified'}</dd>
                   </div>
                   <div className="grid grid-cols-2">
-                    <dt className="text-sm text-muted-foreground">Residential Units</dt>
-                    <dd className="text-sm font-medium">{project.units.residential}</dd>
-                  </div>
-                  <div className="grid grid-cols-2">
-                    <dt className="text-sm text-muted-foreground">Commercial Units</dt>
-                    <dd className="text-sm font-medium">{project.units.commercial}</dd>
+                    <dt className="text-sm text-muted-foreground">Project Description</dt>
+                    <dd className="text-sm font-medium">{project.description || 'Not specified'}</dd>
                   </div>
                 </dl>
               </CardContent>
@@ -220,9 +231,9 @@ const ProjectDetail = () => {
             
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Booking Status</CardTitle>
+                <CardTitle className="text-lg">Progress Status</CardTitle>
               </CardHeader>
-              <CardContent className="h-[300px]">
+              <CardContent>
                 <div className="mb-6">
                   <div className="flex justify-between mb-2">
                     <span className="text-sm text-muted-foreground">Booked Units</span>
@@ -254,6 +265,25 @@ const ProjectDetail = () => {
                     ></div>
                   </div>
                 </div>
+                
+                <Separator className="my-4" />
+                
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm text-muted-foreground">Payment Collection</span>
+                    <span className="text-sm font-medium">{project.financials.collectionPercentage}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-yellow-500 h-2 rounded-full"
+                      style={{ width: `${project.financials.collectionPercentage}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between mt-1 text-xs text-muted-foreground">
+                    <span>{formatCurrency(project.financials.receivedAmount)}</span>
+                    <span>of {formatCurrency(project.financials.totalValue)}</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -271,13 +301,13 @@ const ProjectDetail = () => {
                     <div className="grid grid-cols-2">
                       <dt className="text-sm text-muted-foreground">Total Value</dt>
                       <dd className="text-sm font-medium">
-                        ₹{(project.financials.totalValue / 10000000).toFixed(2)} Cr
+                        {formatCurrency(project.financials.totalValue)}
                       </dd>
                     </div>
                     <div className="grid grid-cols-2">
                       <dt className="text-sm text-muted-foreground">Received Amount</dt>
                       <dd className="text-sm font-medium">
-                        ₹{(project.financials.receivedAmount / 10000000).toFixed(2)} Cr
+                        {formatCurrency(project.financials.receivedAmount)}
                       </dd>
                     </div>
                     <div className="grid grid-cols-2">
@@ -287,13 +317,13 @@ const ProjectDetail = () => {
                     <div className="grid grid-cols-2">
                       <dt className="text-sm text-muted-foreground">Construction Cost</dt>
                       <dd className="text-sm font-medium">
-                        ₹{(project.financials.constructionCost / 10000000).toFixed(2)} Cr
+                        {formatCurrency(project.financials.constructionCost)}
                       </dd>
                     </div>
                     <div className="grid grid-cols-2">
                       <dt className="text-sm text-muted-foreground">Land Cost</dt>
                       <dd className="text-sm font-medium">
-                        ₹{(project.financials.landCost / 10000000).toFixed(2)} Cr
+                        {formatCurrency(project.financials.landCost)}
                       </dd>
                     </div>
                   </dl>
@@ -305,6 +335,62 @@ const ProjectDetail = () => {
                     />
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="units" className="mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Units Breakdown</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="space-y-4">
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Total Units</dt>
+                    <dd className="text-sm font-medium">{project.units.total}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Booked Units</dt>
+                    <dd className="text-sm font-medium">{project.units.booked} ({project.units.bookingPercentage}%)</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Residential Units</dt>
+                    <dd className="text-sm font-medium">{project.units.residential}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Commercial Units</dt>
+                    <dd className="text-sm font-medium">{project.units.commercial}</dd>
+                  </div>
+                </dl>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Area Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="space-y-4">
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Total Land Area</dt>
+                    <dd className="text-sm font-medium">{project.area.total.toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Total Carpet Area</dt>
+                    <dd className="text-sm font-medium">{project.area.carpet.toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Total Built-up Area</dt>
+                    <dd className="text-sm font-medium">{project.area.built.toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Total Balcony Area</dt>
+                    <dd className="text-sm font-medium">{project.area.balcony.toLocaleString()} sq.m</dd>
+                  </div>
+                </dl>
               </CardContent>
             </Card>
           </div>

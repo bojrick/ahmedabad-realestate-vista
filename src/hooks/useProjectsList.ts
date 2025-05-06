@@ -8,9 +8,6 @@ import { transformProjectData } from "@/adapters/projectsAdapter";
 // Number of items to load per page
 const PAGE_SIZE = 12;
 
-// The known total count of projects
-const TOTAL_PROJECTS_COUNT = 15000;
-
 /**
  * Custom hook to fetch paginated projects with filters
  */
@@ -19,7 +16,7 @@ export const useProjectsQuery = (filters: ProjectFilters = {}) => {
 
   // Convert filters to query parameters
   const prepareQuery = (query: any) => {
-    let baseQuery = query.from('gujrera_projects_detailed_summary').select('*');
+    let baseQuery = query.from('gujrera_projects_detailed_summary').select('*', { count: 'exact' });
     
     // Apply filters if provided
     if (filters.type && filters.type.length) {
@@ -56,7 +53,7 @@ export const useProjectsQuery = (filters: ProjectFilters = {}) => {
         const query = prepareQuery(supabase);
         
         // Add pagination
-        const { data, error } = await query
+        const { data, error, count } = await query
           .range(pageParam * PAGE_SIZE, (pageParam + 1) * PAGE_SIZE - 1)
           .order('projectregid', { ascending: false });
         
@@ -68,7 +65,7 @@ export const useProjectsQuery = (filters: ProjectFilters = {}) => {
         return {
           projects: transformedData,
           nextPage: data.length === PAGE_SIZE ? pageParam + 1 : undefined,
-          totalCount: TOTAL_PROJECTS_COUNT // Use the known total count
+          totalCount: count || 0
         };
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -93,6 +90,6 @@ export const useProjectsQuery = (filters: ProjectFilters = {}) => {
     hasNextPage: projectsQuery.hasNextPage,
     fetchNextPage: projectsQuery.fetchNextPage,
     isFetchingNextPage: projectsQuery.isFetchingNextPage,
-    totalCount: TOTAL_PROJECTS_COUNT
+    totalCount: projectsQuery.data?.pages[0]?.totalCount || 0
   };
 };

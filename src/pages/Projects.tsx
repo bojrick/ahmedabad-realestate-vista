@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { useProjectsQuery } from "@/hooks/useProjectsQuery";
 import ProjectList from "@/components/ProjectList";
 import { ProjectFilters } from "@/types/project";
-import { MapPin, Filter, Table, List } from "lucide-react";
+import { MapPin, Filter, Table, List, Loader } from "lucide-react";
 
 const Projects = () => {
   const [viewType, setViewType] = useState<"list" | "table">("list");
@@ -103,18 +103,25 @@ const Projects = () => {
         </div>
       </div>
       
-      <ProjectList 
-        projects={paginatedProjects}
-        loading={isLoading}
-        onFilterChange={handleFilterChange}
-        onResetFilters={resetFilters}
-        viewType={viewType}
-        totalCount={totalCount}
-        currentPage={currentPage}
-        onPageChange={handlePageChange}
-        hasNextPage={hasNextPage}
-        hasPreviousPage={currentPage > 1}
-      />
+      {isLoading ? (
+        <div className="flex justify-center items-center py-20">
+          <Loader className="h-8 w-8 animate-spin text-muted-foreground" />
+          <span className="ml-2">Loading projects...</span>
+        </div>
+      ) : (
+        <ProjectList 
+          projects={paginatedProjects}
+          loading={isLoading}
+          onFilterChange={handleFilterChange}
+          onResetFilters={resetFilters}
+          viewType={viewType}
+          totalCount={totalCount}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          hasNextPage={hasNextPage}
+          hasPreviousPage={currentPage > 1}
+        />
+      )}
     </div>
   );
 };

@@ -308,8 +308,8 @@ const ProjectList: React.FC<ProjectListProps> = ({
       )}
       
       <div className="mt-6 text-center text-sm text-muted-foreground">
-        Showing {filteredProjects.length} projects
-        {totalCount > 0 && ` of ${totalCount} total`}
+        Showing {filteredProjects.length} project{filteredProjects.length !== 1 ? 's' : ''}
+        {totalCount > 0 ? ` of ${totalCount} total` : ''}
       </div>
     </div>
   );
