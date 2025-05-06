@@ -56,7 +56,7 @@ export const useProjectsQuery = (filters: ProjectFilters = {}) => {
         const query = prepareQuery(supabase);
         
         // Add pagination
-        const { data, error, count } = await query
+        const { data, error } = await query
           .range(pageParam * PAGE_SIZE, (pageParam + 1) * PAGE_SIZE - 1)
           .order('projectregid', { ascending: false });
         
@@ -107,41 +107,47 @@ export const useProjectSummaryQuery = () => {
     queryKey: ['projectSummary'],
     queryFn: async () => {
       try {
-        // Get total project count using direct query
+        // Get total project count using RPC function
         const { data: countData, error: countError } = await supabase
           .rpc('get_total_projects_count');
         
         if (countError) throw countError;
         const totalProjects = countData || TOTAL_PROJECTS_COUNT;
 
-        // Get total project value using direct aggregation
+        // Get total project value using RPC function
         const { data: totalValueData, error: valueError } = await supabase
           .rpc('get_total_project_value');
         
         if (valueError) throw valueError;
         const totalValue = totalValueData || 0;
 
-        // Get average booking percentage
+        // Get average booking percentage using RPC function
         const { data: avgBookingData, error: bookingError } = await supabase
           .rpc('get_avg_booking_percentage');
         
         if (bookingError) throw bookingError;
         const avgBookingPercentage = avgBookingData || 0;
 
-        // Get average project progress
+        // Get average project progress using RPC function
         const { data: avgProgressData, error: progressError } = await supabase
           .rpc('get_avg_project_progress');
         
         if (progressError) throw progressError;
         const avgProgress = avgProgressData || 0;
         
-        // Fetch distribution data for charts
+        // Fetch distribution data for charts using direct queries
         // Get project types distribution
         const { data: typeData, error: typeError } = await supabase
           .from('gujrera_projects_detailed_summary')
-          .select('projecttype, count(*)')
+          .select('projecttype, count')
           .not('projecttype', 'is', null)
-          .groupBy('projecttype');
+          // The groupBy method isn't available in the current Supabase JS client version
+          // Use select with count as an aggregate instead
+          .select(`
+            projecttype,
+            count:count(*)
+          `)
+          .group('projecttype');
         
         if (typeError) throw typeError;
         
@@ -153,9 +159,12 @@ export const useProjectSummaryQuery = () => {
         // Get project statuses distribution
         const { data: statusData, error: statusError } = await supabase
           .from('gujrera_projects_detailed_summary')
-          .select('projectstatus, count(*)')
+          .select(`
+            projectstatus,
+            count:count(*)
+          `)
           .not('projectstatus', 'is', null)
-          .groupBy('projectstatus');
+          .group('projectstatus');
         
         if (statusError) throw statusError;
         
@@ -167,9 +176,12 @@ export const useProjectSummaryQuery = () => {
         // Get project locations distribution
         const { data: locationData, error: locationError } = await supabase
           .from('gujrera_projects_detailed_summary')
-          .select('distname, count(*)')
+          .select(`
+            distname,
+            count:count(*)
+          `)
           .not('distname', 'is', null)
-          .groupBy('distname')
+          .group('distname')
           .order('count', { ascending: false })
           .limit(15);
         
@@ -180,14 +192,14 @@ export const useProjectSummaryQuery = () => {
           projectsByLocation[item.distname || 'Unknown'] = parseInt(item.count);
         });
         
-        // Get financial summary
+        // Get financial summary using RPC functions
         const { data: receivedAmountData, error: receivedError } = await supabase
           .rpc('get_total_received_amount');
         
         if (receivedError) throw receivedError;
         const receivedAmount = receivedAmountData || 0;
         
-        // Get total area of land
+        // Get total area of land using RPC function
         const { data: totalAreaData, error: areaError } = await supabase
           .rpc('get_total_area_of_land');
           

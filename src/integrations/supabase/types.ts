@@ -389,7 +389,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_avg_booking_percentage: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_avg_project_progress: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_total_area_of_land: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_total_project_value: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_total_projects_count: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_total_received_amount: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
