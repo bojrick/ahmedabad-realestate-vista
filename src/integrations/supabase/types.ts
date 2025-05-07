@@ -447,6 +447,61 @@ export type Database = {
         }
         Relationships: []
       }
+      project_locations_summary: {
+        Row: {
+          avg_booking_percentage: number | null
+          count: number | null
+          location: string | null
+        }
+        Relationships: []
+      }
+      project_status_summary: {
+        Row: {
+          active_projects: number | null
+          avg_booking_percentage: number | null
+          avg_collection_percentage: number | null
+          avg_progress: number | null
+          completed_projects: number | null
+          delayed_projects: number | null
+          total_projects: number | null
+          total_spend: number | null
+          total_value: number | null
+          unreported_projects: number | null
+        }
+        Relationships: []
+      }
+      project_types_summary: {
+        Row: {
+          count: number | null
+          projecttype: string | null
+        }
+        Relationships: []
+      }
+      promoter_types_summary: {
+        Row: {
+          count: number | null
+          promotertype: string | null
+        }
+        Relationships: []
+      }
+      top_promoters_summary: {
+        Row: {
+          count: number | null
+          promotername: string | null
+        }
+        Relationships: []
+      }
+      yearly_projects_summary: {
+        Row: {
+          avg_unit_consideration: number | null
+          distname: string | null
+          projects_approved: number | null
+          projectstatus: string | null
+          projecttype: string | null
+          year: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_avg_booking_percentage: {
