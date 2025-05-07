@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectSummary, getProjectStatusFromProgress } from "@/types/project";
@@ -22,28 +23,9 @@ export const useProjectSummaryQuery = () => {
         const totalProjects = countData || 0;
         
         // Get project progress data to determine status - use chunked fetching to avoid 1000 item limit
-        let allProjectStatusData: any[] = [];
-        let hasMore = true;
-        let page = 0;
-        const pageSize = 1000; // Supabase maximum limit per request
+        const allProjectStatusData = await fetchAllPaginatedData('gujrera_projects_detailed_summary', 'projectprogress, projectregid');
         
-        while (hasMore) {
-          const { data: chunk, error: progressError, count } = await supabase
-            .from('gujrera_projects_detailed_summary')
-            .select('projectprogress, projectregid', { count: 'exact' })
-            .range(page * pageSize, (page + 1) * pageSize - 1);
-            
-          if (progressError) throw progressError;
-          
-          allProjectStatusData = [...allProjectStatusData, ...chunk];
-          
-          // Check if we've fetched all records
-          if (chunk.length < pageSize) {
-            hasMore = false;
-          } else {
-            page++;
-          }
-        }
+        console.log(`Total projects analyzed: ${allProjectStatusData.length}`);
         
         // Count projects by new status classification
         let activeProjects = 0;
@@ -61,8 +43,6 @@ export const useProjectSummaryQuery = () => {
           }
         });
         
-        console.log(`Total projects analyzed: ${allProjectStatusData.length}`);
-        
         // Get total project value and actual spend
         const { data: totalValueData, error: valueError } = await supabase
           .rpc('get_total_project_value');
@@ -71,26 +51,7 @@ export const useProjectSummaryQuery = () => {
         const totalValue = totalValueData || 0;
         
         // Get total actual spend - using paginated fetching
-        let allSpendData: any[] = [];
-        hasMore = true;
-        page = 0;
-        
-        while (hasMore) {
-          const { data: chunk, error: spendError } = await supabase
-            .from('gujrera_projects_detailed_summary')
-            .select('totalcostincurredandpaid')
-            .range(page * pageSize, (page + 1) * pageSize - 1);
-            
-          if (spendError) throw spendError;
-          
-          allSpendData = [...allSpendData, ...chunk];
-          
-          if (chunk.length < pageSize) {
-            hasMore = false;
-          } else {
-            page++;
-          }
-        }
+        const allSpendData = await fetchAllPaginatedData('gujrera_projects_detailed_summary', 'totalcostincurredandpaid');
         
         const totalSpend = allSpendData.reduce((sum, item) => sum + (item.totalcostincurredandpaid || 0), 0);
         
@@ -104,26 +65,7 @@ export const useProjectSummaryQuery = () => {
         const avgBookingPercentage = avgBookingData || 0;
         
         // Get average collection percentage - with pagination
-        let allCollectionData: any[] = [];
-        hasMore = true;
-        page = 0;
-        
-        while (hasMore) {
-          const { data: chunk, error: collectionError } = await supabase
-            .from('gujrera_projects_detailed_summary')
-            .select('payment_collection_percentage')
-            .range(page * pageSize, (page + 1) * pageSize - 1);
-            
-          if (collectionError) throw collectionError;
-          
-          allCollectionData = [...allCollectionData, ...chunk];
-          
-          if (chunk.length < pageSize) {
-            hasMore = false;
-          } else {
-            page++;
-          }
-        }
+        const allCollectionData = await fetchAllPaginatedData('gujrera_projects_detailed_summary', 'payment_collection_percentage');
         
         const avgCollectionPercentage = allCollectionData.length > 0 
           ? allCollectionData.reduce((sum, item) => sum + (item.payment_collection_percentage || 0), 0) / allCollectionData.length 
