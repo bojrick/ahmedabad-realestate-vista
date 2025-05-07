@@ -1,12 +1,13 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useProjectDetailQuery } from "@/hooks/useProjectsQuery";
+import { useProjectDetailQuery } from "@/hooks/useProjectDetail";
 import { PieChart, BarChart, FileText, ArrowLeft, Building, MapPin, Calendar, Loader } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import ProjectValueChart from "@/components/charts/ProjectValueChart";
 
 const ProjectDetail = () => {
@@ -48,7 +49,7 @@ const ProjectDetail = () => {
   }
   
   // Format date if available
-  const formatDate = (date: Date | null) => {
+  const formatDate = (date: Date | string | null) => {
     if (!date) return "Not specified";
     return new Date(date).toLocaleDateString('en-IN', {
       day: 'numeric',
@@ -182,11 +183,12 @@ const ProjectDetail = () => {
       </div>
 
       <Tabs defaultValue="overview" className="mt-6">
-        <TabsList>
+        <TabsList className="grid grid-cols-2 md:grid-cols-5 lg:w-[600px]">
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="financial">Financial Data</TabsTrigger>
+          <TabsTrigger value="financial">Financial</TabsTrigger>
           <TabsTrigger value="units">Units & Area</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="technical">Technical</TabsTrigger>
+          <TabsTrigger value="raw">Raw Data</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview" className="mt-4">
@@ -198,12 +200,24 @@ const ProjectDetail = () => {
               <CardContent>
                 <dl className="space-y-4">
                   <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Project ID</dt>
+                    <dd className="text-sm font-medium">{project.id}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Project Name</dt>
+                    <dd className="text-sm font-medium">{project.name}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
                     <dt className="text-sm text-muted-foreground">Project Type</dt>
                     <dd className="text-sm font-medium">{project.type}</dd>
                   </div>
                   <div className="grid grid-cols-2">
                     <dt className="text-sm text-muted-foreground">Status</dt>
                     <dd className="text-sm font-medium">{project.status}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Progress</dt>
+                    <dd className="text-sm font-medium">{project.progress}%</dd>
                   </div>
                   <div className="grid grid-cols-2">
                     <dt className="text-sm text-muted-foreground">Address</dt>
@@ -214,6 +228,24 @@ const ProjectDetail = () => {
                     <dd className="text-sm font-medium">{project.location}</dd>
                   </div>
                   <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Pincode</dt>
+                    <dd className="text-sm font-medium">{project.pincode || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Moje</dt>
+                    <dd className="text-sm font-medium">{project.moje || 'Not specified'}</dd>
+                  </div>
+                </dl>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Developer Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="space-y-4">
+                  <div className="grid grid-cols-2">
                     <dt className="text-sm text-muted-foreground">Promoter</dt>
                     <dd className="text-sm font-medium">{project.promoter}</dd>
                   </div>
@@ -222,8 +254,32 @@ const ProjectDetail = () => {
                     <dd className="text-sm font-medium">{project.promoterType || 'Not specified'}</dd>
                   </div>
                   <div className="grid grid-cols-2">
-                    <dt className="text-sm text-muted-foreground">Project Description</dt>
-                    <dd className="text-sm font-medium">{project.description || 'Not specified'}</dd>
+                    <dt className="text-sm text-muted-foreground">Architect</dt>
+                    <dd className="text-sm font-medium">{project.architectName || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Architect Address</dt>
+                    <dd className="text-sm font-medium">{project.architectAddress || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Engineer</dt>
+                    <dd className="text-sm font-medium">{project.engineerName || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Engineer Address</dt>
+                    <dd className="text-sm font-medium">{project.engineerAddress || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">TP Number</dt>
+                    <dd className="text-sm font-medium">{project.tpNumber || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">TP Name</dt>
+                    <dd className="text-sm font-medium">{project.tpName || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Place</dt>
+                    <dd className="text-sm font-medium">{project.place || 'Not specified'}</dd>
                   </div>
                 </dl>
               </CardContent>
@@ -284,6 +340,61 @@ const ProjectDetail = () => {
                     <span>of {formatCurrency(project.financials.totalValue)}</span>
                   </div>
                 </div>
+                
+                <div className="mt-4">
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm text-muted-foreground">Area Booking</span>
+                    <span className="text-sm font-medium">{project.areaBookingPercentage || 0}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-purple-500 h-2 rounded-full"
+                      style={{ width: `${project.areaBookingPercentage || 0}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Key Dates</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="space-y-4">
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Start Date</dt>
+                    <dd className="text-sm font-medium">{formatDate(project.dates.start)}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Completion Date</dt>
+                    <dd className="text-sm font-medium">{formatDate(project.dates.completion)}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Last Updated</dt>
+                    <dd className="text-sm font-medium">{formatDate(project.dates.lastUpdated)}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Submission Date</dt>
+                    <dd className="text-sm font-medium">{formatDate(project.dates.submission)}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Last Sale</dt>
+                    <dd className="text-sm font-medium">{formatDate(project.dates.lastSale)}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Project Approved Date</dt>
+                    <dd className="text-sm font-medium">{formatDate(project.projectApprovedDate)}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">RERA Submission Date</dt>
+                    <dd className="text-sm font-medium">{formatDate(project.reraSubmissionDate)}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Time Lapse</dt>
+                    <dd className="text-sm font-medium">{project.timeLapse || 'Not specified'}</dd>
+                  </div>
+                </dl>
               </CardContent>
             </Card>
           </div>
@@ -297,36 +408,38 @@ const ProjectDetail = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <dl className="space-y-4">
-                    <div className="grid grid-cols-2">
-                      <dt className="text-sm text-muted-foreground">Total Value</dt>
-                      <dd className="text-sm font-medium">
-                        {formatCurrency(project.financials.totalValue)}
-                      </dd>
-                    </div>
-                    <div className="grid grid-cols-2">
-                      <dt className="text-sm text-muted-foreground">Received Amount</dt>
-                      <dd className="text-sm font-medium">
-                        {formatCurrency(project.financials.receivedAmount)}
-                      </dd>
-                    </div>
-                    <div className="grid grid-cols-2">
-                      <dt className="text-sm text-muted-foreground">Collection %</dt>
-                      <dd className="text-sm font-medium">{project.financials.collectionPercentage}%</dd>
-                    </div>
-                    <div className="grid grid-cols-2">
-                      <dt className="text-sm text-muted-foreground">Construction Cost</dt>
-                      <dd className="text-sm font-medium">
-                        {formatCurrency(project.financials.constructionCost)}
-                      </dd>
-                    </div>
-                    <div className="grid grid-cols-2">
-                      <dt className="text-sm text-muted-foreground">Land Cost</dt>
-                      <dd className="text-sm font-medium">
-                        {formatCurrency(project.financials.landCost)}
-                      </dd>
-                    </div>
-                  </dl>
+                  <div>
+                    <dl className="space-y-4">
+                      <div className="grid grid-cols-2">
+                        <dt className="text-sm text-muted-foreground">Total Value</dt>
+                        <dd className="text-sm font-medium">
+                          {formatCurrency(project.financials.totalValue)}
+                        </dd>
+                      </div>
+                      <div className="grid grid-cols-2">
+                        <dt className="text-sm text-muted-foreground">Received Amount</dt>
+                        <dd className="text-sm font-medium">
+                          {formatCurrency(project.financials.receivedAmount)}
+                        </dd>
+                      </div>
+                      <div className="grid grid-cols-2">
+                        <dt className="text-sm text-muted-foreground">Collection %</dt>
+                        <dd className="text-sm font-medium">{project.financials.collectionPercentage}%</dd>
+                      </div>
+                      <div className="grid grid-cols-2">
+                        <dt className="text-sm text-muted-foreground">Construction Cost</dt>
+                        <dd className="text-sm font-medium">
+                          {formatCurrency(project.financials.constructionCost)}
+                        </dd>
+                      </div>
+                      <div className="grid grid-cols-2">
+                        <dt className="text-sm text-muted-foreground">Land Cost</dt>
+                        <dd className="text-sm font-medium">
+                          {formatCurrency(project.financials.landCost)}
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
                   
                   <div className="h-[300px]">
                     <ProjectValueChart 
@@ -335,6 +448,199 @@ const ProjectDetail = () => {
                     />
                   </div>
                 </div>
+                
+                <Separator className="my-6" />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Land & Development Costs</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <dl className="space-y-3">
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Acquisition Cost of Land (A)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.acquisitionCostOfLandA || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Acquisition Cost of Land (B)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.acquisitionCostOfLandB || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Premium Payable (A)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.premiumPayableA || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Premium Payable (B)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.premiumPayableB || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">TDR Acquisition Cost (A)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.tdrAcquisitionCostA || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">TDR Acquisition Cost (B)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.tdrAcquisitionCostB || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Land Premium (A)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.landPremiumA || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Land Premium (B)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.landPremiumB || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Subtotal of Land Cost (A)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.subtotalOfLandCostA || 0)}</dd>
+                        </div>
+                      </dl>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Development & Construction Costs</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <dl className="space-y-3">
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Est. Construction Cost (A)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.estConstructionCostA || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Actual Construction Cost (B)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.actualConstructionCostB || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Onsite Development (A)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.onsiteDevelopmentA || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Onsite Development (B)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.onsiteDevelopmentB || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Tax Payments (A)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.taxPaymentsA || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Tax Payments (B)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.taxPaymentsB || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Finance Interest (A)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.financeInterestA || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Finance Interest (B)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.financeInterestB || 0)}</dd>
+                        </div>
+                      </dl>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <Separator className="my-6" />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Cost Totals</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <dl className="space-y-3">
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Subtotal Development Cost (A)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.subtotalDevelopmentCostA || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Subtotal Development Cost (B)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.subtotalDevelopmentCostB || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Total Estimated Project Cost</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.totalEstimatedProjectCost || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Total Cost Incurred & Paid</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.totalCostIncurredAndPaid || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Est. Balance Cost to Complete</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.estimatedBalanceCostToComplete || 0)}</dd>
+                        </div>
+                      </dl>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base">Government Payments</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <dl className="space-y-3">
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">State Govt. Amount (A)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.stateGovtAmountA || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">State Govt. Amount (B)</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.stateGovtAmountB || 0)}</dd>
+                        </div>
+                      </dl>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <Separator className="my-6" />
+                
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Designated Account Information</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <dl className="space-y-3">
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Amount Withdrawn from Designated Account</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.amountWithdrawnFromDesignatedAccount || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Amount Withdrawn to Date</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.amountWithdrawnToDate || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Net Amount Withdrawn</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.netAmountWithdrawnFromDesignatedAccount || 0)}</dd>
+                        </div>
+                      </dl>
+                      
+                      <dl className="space-y-3">
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Balance Unbooked Area Certificate</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.balanceUnbookedAreaCertificate || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Balance Receivables from Booked Units</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.balanceReceivablesFromBookedUnits || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Estimated Sales from Unbooked Units</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.estimatedSalesProceedsForUnbookedUnits || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Estimated Receivables</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.estimatedReceivablesOngoingProject || 0)}</dd>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <dt className="text-xs text-muted-foreground">Amount to be Deposited</dt>
+                          <dd className="text-sm font-medium">{formatCurrency(project.amountToBeDepositedInDesignatedAccount || 0)}</dd>
+                        </div>
+                      </dl>
+                    </div>
+                  </CardContent>
+                </Card>
               </CardContent>
             </Card>
           </div>
@@ -364,6 +670,30 @@ const ProjectDetail = () => {
                     <dt className="text-sm text-muted-foreground">Commercial Units</dt>
                     <dd className="text-sm font-medium">{project.units.commercial}</dd>
                   </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Office Units</dt>
+                    <dd className="text-sm font-medium">{project.officeUnits || 0}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Shop Units</dt>
+                    <dd className="text-sm font-medium">{project.shopUnits || 0}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Other Units</dt>
+                    <dd className="text-sm font-medium">{project.otherUnits || 0}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Plot Units</dt>
+                    <dd className="text-sm font-medium">{project.plotUnits || 0}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Flat Units</dt>
+                    <dd className="text-sm font-medium">{project.flatUnits || 0}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Inventory Count</dt>
+                    <dd className="text-sm font-medium">{project.inventoryCount || 0}</dd>
+                  </div>
                 </dl>
               </CardContent>
             </Card>
@@ -390,21 +720,330 @@ const ProjectDetail = () => {
                     <dt className="text-sm text-muted-foreground">Total Balcony Area</dt>
                     <dd className="text-sm font-medium">{project.area.balcony.toLocaleString()} sq.m</dd>
                   </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Project Land Area</dt>
+                    <dd className="text-sm font-medium">{(project.projectTotalLandArea || 0).toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Project Carpet Area</dt>
+                    <dd className="text-sm font-medium">{(project.projectTotalCarpetArea || 0).toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Total Covered Area</dt>
+                    <dd className="text-sm font-medium">{(project.totalCoveredArea || 0).toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Total Open Area</dt>
+                    <dd className="text-sm font-medium">{(project.totalOpenArea || 0).toLocaleString()} sq.m</dd>
+                  </div>
+                </dl>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Residential Unit Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="space-y-4">
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Residential Carpet Area</dt>
+                    <dd className="text-sm font-medium">{(project.residentialCarpetArea || 0).toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Residential Balcony Area</dt>
+                    <dd className="text-sm font-medium">{(project.residentialBalconyArea || 0).toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Residential Unit Value</dt>
+                    <dd className="text-sm font-medium">{formatCurrency(project.residentialUnitConsideration || 0)}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Residential Amount Received</dt>
+                    <dd className="text-sm font-medium">{formatCurrency(project.residentialReceivedAmount || 0)}</dd>
+                  </div>
+                </dl>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Commercial Unit Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="space-y-4">
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Office Carpet Area</dt>
+                    <dd className="text-sm font-medium">{(project.officeCarpetArea || 0).toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Office Balcony Area</dt>
+                    <dd className="text-sm font-medium">{(project.officeBalconyArea || 0).toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Office Unit Value</dt>
+                    <dd className="text-sm font-medium">{formatCurrency(project.officeUnitConsideration || 0)}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Office Amount Received</dt>
+                    <dd className="text-sm font-medium">{formatCurrency(project.officeReceivedAmount || 0)}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Shop Carpet Area</dt>
+                    <dd className="text-sm font-medium">{(project.shopCarpetArea || 0).toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Shop Balcony Area</dt>
+                    <dd className="text-sm font-medium">{(project.shopBalconyArea || 0).toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Shop Unit Value</dt>
+                    <dd className="text-sm font-medium">{formatCurrency(project.shopUnitConsideration || 0)}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Shop Amount Received</dt>
+                    <dd className="text-sm font-medium">{formatCurrency(project.shopReceivedAmount || 0)}</dd>
+                  </div>
+                </dl>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Parking Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="space-y-4">
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Open Parking Area</dt>
+                    <dd className="text-sm font-medium">{(project.openParkingArea || 0).toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Covered Parking Area</dt>
+                    <dd className="text-sm font-medium">{(project.coveredParkingArea || 0).toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Covered Parking Count</dt>
+                    <dd className="text-sm font-medium">{project.coveredParking || 0}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Parking For Sale Count</dt>
+                    <dd className="text-sm font-medium">{project.parkingForSaleCount || 0}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Parking For Sale Area</dt>
+                    <dd className="text-sm font-medium">{(project.parkingForSaleArea || 0).toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Garage For Sale Count</dt>
+                    <dd className="text-sm font-medium">{project.garageForSaleCount || 0}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Garage For Sale Area</dt>
+                    <dd className="text-sm font-medium">{(project.garageForSaleArea || 0).toLocaleString()} sq.m</dd>
+                  </div>
+                </dl>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Booking Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="space-y-4">
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Booked Carpet Area</dt>
+                    <dd className="text-sm font-medium">{(project.bookedCarpetArea || 0).toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Booked Balcony Area</dt>
+                    <dd className="text-sm font-medium">{(project.bookedBalconyArea || 0).toLocaleString()} sq.m</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Booked Unit Value</dt>
+                    <dd className="text-sm font-medium">{formatCurrency(project.bookedUnitConsideration || 0)}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Booked Received Amount</dt>
+                    <dd className="text-sm font-medium">{formatCurrency(project.bookedReceivedAmount || 0)}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Booking Percentage</dt>
+                    <dd className="text-sm font-medium">{project.units.bookingPercentage}%</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Area Booking Percentage</dt>
+                    <dd className="text-sm font-medium">{project.areaBookingPercentage || 0}%</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Payment Collection Percentage</dt>
+                    <dd className="text-sm font-medium">{project.financials.collectionPercentage}%</dd>
+                  </div>
                 </dl>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
         
-        <TabsContent value="documents" className="mt-4">
+        <TabsContent value="technical" className="mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Technical Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="space-y-4">
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Project Description</dt>
+                    <dd className="text-sm font-medium">{project.projectDescription || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Method of Land Valuation</dt>
+                    <dd className="text-sm font-medium">{project.landValuationMethod || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Under Redevelopment</dt>
+                    <dd className="text-sm font-medium">{project.underRedevelopment || 'No'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Office Name</dt>
+                    <dd className="text-sm font-medium">{project.officeName || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Process Type</dt>
+                    <dd className="text-sm font-medium">{project.processType || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Location Status</dt>
+                    <dd className="text-sm font-medium">{project.locationStatus || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Airport Distance</dt>
+                    <dd className="text-sm font-medium">{project.airportDistance ? `${project.airportDistance} km` : 'Not specified'}</dd>
+                  </div>
+                </dl>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Professional Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="space-y-4">
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Architect Projects</dt>
+                    <dd className="text-sm font-medium">{project.architectProjects || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Architect Experience</dt>
+                    <dd className="text-sm font-medium">{project.architectExperience ? `${project.architectExperience} years` : 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Engineer Projects</dt>
+                    <dd className="text-sm font-medium">{project.engineerProjects || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Engineer Experience</dt>
+                    <dd className="text-sm font-medium">{project.engineerExperience ? `${project.engineerExperience} years` : 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Architect Score</dt>
+                    <dd className="text-sm font-medium">{project.architectScore || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Engineer Score</dt>
+                    <dd className="text-sm font-medium">{project.engineerScore || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">TPO Code</dt>
+                    <dd className="text-sm font-medium">{project.tpoCode || 'Not specified'}</dd>
+                  </div>
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Project Score</dt>
+                    <dd className="text-sm font-medium">{project.projectScore || 'Not specified'}</dd>
+                  </div>
+                </dl>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Location Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="space-y-4">
+                  <div className="grid grid-cols-2">
+                    <dt className="text-sm text-muted-foreground">Coordinates</dt>
+                    <dd className="text-sm font-medium">
+                      {project.coordinates ? 
+                        `${project.coordinates.latitude}, ${project.coordinates.longitude}` : 
+                        'Not specified'}
+                    </dd>
+                  </div>
+                  {project.coordinates && (
+                    <div className="mt-4">
+                      <div className="bg-gray-100 rounded-md p-2 text-center">
+                        <p className="text-xs text-muted-foreground mb-2">Location Map</p>
+                        <a 
+                          href={`https://maps.google.com/?q=${project.coordinates.latitude},${project.coordinates.longitude}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:underline"
+                        >
+                          View on Google Maps
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </dl>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="raw" className="mt-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Project Documents</CardTitle>
+              <CardTitle className="text-lg">Raw Project Data</CardTitle>
+              <p className="text-sm text-muted-foreground">Complete raw data from the database</p>
             </CardHeader>
             <CardContent>
-              <p className="text-center text-muted-foreground py-8">
-                Document management coming soon
-              </p>
+              <div className="overflow-auto max-h-[600px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="whitespace-nowrap">Field</TableHead>
+                      <TableHead className="whitespace-nowrap">Value</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {Object.entries(project).map(([key, value]) => {
+                      let displayValue: React.ReactNode;
+                      
+                      if (typeof value === 'object' && value !== null) {
+                        displayValue = (
+                          <pre className="text-xs whitespace-pre-wrap overflow-auto max-h-[100px] bg-gray-50 p-2 rounded">
+                            {JSON.stringify(value, null, 2)}
+                          </pre>
+                        );
+                      } else if (value === null || value === undefined) {
+                        displayValue = <span className="text-gray-400 italic">null</span>;
+                      } else {
+                        displayValue = String(value);
+                      }
+                      
+                      return (
+                        <TableRow key={key}>
+                          <TableCell className="font-medium whitespace-nowrap">{key}</TableCell>
+                          <TableCell>{displayValue}</TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

@@ -42,6 +42,124 @@ export interface ProjectData {
     submission: string | null;
     lastSale: string | null;
   };
+  
+  // Additional fields from raw data
+  projectDescription?: string;
+  pincode?: string;
+  moje?: string;
+  architectName?: string;
+  architectAddress?: string;
+  engineerName?: string;
+  engineerAddress?: string;
+  tpNumber?: string;
+  tpName?: string;
+  place?: string;
+  
+  // Professional details
+  architectProjects?: number;
+  architectExperience?: number;
+  engineerProjects?: number;
+  engineerExperience?: number;
+  architectScore?: string;
+  engineerScore?: string;
+  projectScore?: string;
+  tpoCode?: string;
+  
+  // Location details
+  locationStatus?: string;
+  airportDistance?: number;
+  
+  // Technical details
+  landValuationMethod?: string;
+  underRedevelopment?: string;
+  officeName?: string;
+  processType?: string;
+  reraSubmissionDate?: string;
+  projectApprovedDate?: string;
+  timeLapse?: string;
+  
+  // Unit details
+  officeUnits?: number;
+  shopUnits?: number;
+  otherUnits?: number;
+  plotUnits?: number;
+  flatUnits?: number;
+  inventoryCount?: number;
+  
+  // Financial and areas
+  residentialCarpetArea?: number;
+  residentialBalconyArea?: number;
+  residentialUnitConsideration?: number;
+  residentialReceivedAmount?: number;
+  
+  officeCarpetArea?: number;
+  officeBalconyArea?: number;
+  officeUnitConsideration?: number;
+  officeReceivedAmount?: number;
+  
+  shopCarpetArea?: number;
+  shopBalconyArea?: number;
+  shopUnitConsideration?: number;
+  shopReceivedAmount?: number;
+  
+  bookedCarpetArea?: number;
+  bookedBalconyArea?: number;
+  bookedUnitConsideration?: number;
+  bookedReceivedAmount?: number;
+  
+  areaBookingPercentage?: number;
+  projectTotalLandArea?: number;
+  projectTotalCarpetArea?: number;
+  totalCoveredArea?: number;
+  totalOpenArea?: number;
+  
+  // Parking details
+  openParkingArea?: number;
+  coveredParkingArea?: number;
+  coveredParking?: number;
+  parkingForSaleCount?: number;
+  parkingForSaleArea?: number;
+  garageForSaleCount?: number;
+  garageForSaleArea?: number;
+  
+  // Cost details
+  acquisitionCostOfLandA?: number;
+  acquisitionCostOfLandB?: number;
+  premiumPayableA?: number;
+  premiumPayableB?: number;
+  tdrAcquisitionCostA?: number;
+  tdrAcquisitionCostB?: number;
+  landPremiumA?: number;
+  landPremiumB?: number;
+  subtotalOfLandCostA?: number;
+  
+  estConstructionCostA?: number;
+  actualConstructionCostB?: number;
+  onsiteDevelopmentA?: number;
+  onsiteDevelopmentB?: number;
+  taxPaymentsA?: number;
+  taxPaymentsB?: number;
+  financeInterestA?: number;
+  financeInterestB?: number;
+  
+  subtotalDevelopmentCostA?: number;
+  subtotalDevelopmentCostB?: number;
+  totalEstimatedProjectCost?: number;
+  totalCostIncurredAndPaid?: number;
+  estimatedBalanceCostToComplete?: number;
+  
+  stateGovtAmountA?: number;
+  stateGovtAmountB?: number;
+  
+  // Designated account details
+  amountWithdrawnFromDesignatedAccount?: number;
+  amountWithdrawnToDate?: number;
+  netAmountWithdrawnFromDesignatedAccount?: number;
+  balanceUnbookedAreaCertificate?: number;
+  balanceReceivablesFromBookedUnits?: number;
+  estimatedSalesProceedsForUnbookedUnits?: number;
+  estimatedReceivablesOngoingProject?: number;
+  amountToBeDepositedInDesignatedAccount?: number;
 }
 
 export interface ProjectSummary {
