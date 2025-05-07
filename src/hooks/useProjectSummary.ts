@@ -4,9 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { ProjectSummary, getProjectStatusFromProgress } from "@/types/project";
 import { useToast } from "@/hooks/use-toast";
 
-// The known total count of projects
-const TOTAL_PROJECTS_COUNT = 15000;
-
 /**
  * Custom hook to fetch project summary statistics directly from database
  */
@@ -23,14 +20,31 @@ export const useProjectSummaryQuery = () => {
           .rpc('get_total_projects_count');
         
         if (countError) throw countError;
-        const totalProjects = countData || TOTAL_PROJECTS_COUNT;
+        const totalProjects = countData || 0;
         
-        // Get project progress data to determine status
-        const { data: projectStatusData, error: progressError } = await supabase
-          .from('gujrera_projects_detailed_summary')
-          .select('projectprogress, projectregid');
+        // Get project progress data to determine status - use chunked fetching to avoid 1000 item limit
+        let allProjectStatusData: any[] = [];
+        let hasMore = true;
+        let page = 0;
+        const pageSize = 1000; // Supabase maximum limit per request
+        
+        while (hasMore) {
+          const { data: chunk, error: progressError, count } = await supabase
+            .from('gujrera_projects_detailed_summary')
+            .select('projectprogress, projectregid', { count: 'exact' })
+            .range(page * pageSize, (page + 1) * pageSize - 1);
+            
+          if (progressError) throw progressError;
           
-        if (progressError) throw progressError;
+          allProjectStatusData = [...allProjectStatusData, ...chunk];
+          
+          // Check if we've fetched all records
+          if (chunk.length < pageSize) {
+            hasMore = false;
+          } else {
+            page++;
+          }
+        }
         
         // Count projects by new status classification
         let activeProjects = 0;
@@ -38,7 +52,7 @@ export const useProjectSummaryQuery = () => {
         let delayedProjects = 0;
         let unreportedProjects = 0;
         
-        projectStatusData.forEach(project => {
+        allProjectStatusData.forEach(project => {
           const status = getProjectStatusFromProgress(project.projectprogress);
           switch (status) {
             case 'active': activeProjects++; break;
@@ -48,6 +62,8 @@ export const useProjectSummaryQuery = () => {
           }
         });
         
+        console.log(`Total projects analyzed: ${allProjectStatusData.length}`);
+        
         // Get total project value and actual spend
         const { data: totalValueData, error: valueError } = await supabase
           .rpc('get_total_project_value');
@@ -55,30 +71,66 @@ export const useProjectSummaryQuery = () => {
         if (valueError) throw valueError;
         const totalValue = totalValueData || 0;
         
-        // Get total actual spend
-        const { data: totalSpendData, error: spendError } = await supabase
-          .from('gujrera_projects_detailed_summary')
-          .select('totalcostincurredandpaid');
+        // Get total actual spend - using paginated fetching
+        let allSpendData: any[] = [];
+        hasMore = true;
+        page = 0;
+        
+        while (hasMore) {
+          const { data: chunk, error: spendError } = await supabase
+            .from('gujrera_projects_detailed_summary')
+            .select('totalcostincurredandpaid')
+            .range(page * pageSize, (page + 1) * pageSize - 1);
+            
+          if (spendError) throw spendError;
           
-        if (spendError) throw spendError;
-        const totalSpend = totalSpendData.reduce((sum, item) => sum + (item.totalcostincurredandpaid || 0), 0);
+          allSpendData = [...allSpendData, ...chunk];
+          
+          if (chunk.length < pageSize) {
+            hasMore = false;
+          } else {
+            page++;
+          }
+        }
+        
+        const totalSpend = allSpendData.reduce((sum, item) => sum + (item.totalcostincurredandpaid || 0), 0);
+        
+        console.log(`Spend data records analyzed: ${allSpendData.length}`);
 
-        // Get average booking percentage and collection percentage
+        // Get average booking percentage
         const { data: avgBookingData, error: bookingError } = await supabase
           .rpc('get_avg_booking_percentage');
         
         if (bookingError) throw bookingError;
         const avgBookingPercentage = avgBookingData || 0;
         
-        // Get average collection percentage
-        const { data: collectionData, error: collectionError } = await supabase
-          .from('gujrera_projects_detailed_summary')
-          .select('payment_collection_percentage');
+        // Get average collection percentage - with pagination
+        let allCollectionData: any[] = [];
+        hasMore = true;
+        page = 0;
+        
+        while (hasMore) {
+          const { data: chunk, error: collectionError } = await supabase
+            .from('gujrera_projects_detailed_summary')
+            .select('payment_collection_percentage')
+            .range(page * pageSize, (page + 1) * pageSize - 1);
+            
+          if (collectionError) throw collectionError;
           
-        if (collectionError) throw collectionError;
-        const avgCollectionPercentage = collectionData.length > 0 
-          ? collectionData.reduce((sum, item) => sum + (item.payment_collection_percentage || 0), 0) / collectionData.length 
+          allCollectionData = [...allCollectionData, ...chunk];
+          
+          if (chunk.length < pageSize) {
+            hasMore = false;
+          } else {
+            page++;
+          }
+        }
+        
+        const avgCollectionPercentage = allCollectionData.length > 0 
+          ? allCollectionData.reduce((sum, item) => sum + (item.payment_collection_percentage || 0), 0) / allCollectionData.length 
           : 0;
+          
+        console.log(`Collection data records analyzed: ${allCollectionData.length}`);
 
         // Get average project progress
         const { data: avgProgressData, error: progressDataError } = await supabase
@@ -87,7 +139,7 @@ export const useProjectSummaryQuery = () => {
         if (progressDataError) throw progressDataError;
         const avgProgress = avgProgressData || 0;
         
-        // 2. Year-over-Year Data
+        // 2. Year-over-Year Data - simulated with random values as in the original
         // For this we need to get data from a year ago - we'll simulate this with a multiplier
         // In a real implementation, this would query historical data tables or snapshots
         const simulateYoyChange = (value: number, min: number = -15, max: number = 15) => {
@@ -156,13 +208,35 @@ async function collectProjectSummaryData(
     return parseFloat(percentChange.toFixed(1));
   };
 
-  // 2. Project Pipeline Breakdown
-  // Fetch data for project status distribution
-  const { data: statusData, error: statusError } = await supabase
-    .from('gujrera_projects_detailed_summary')
-    .select('projectprogress');
+  // Helper function to fetch paginated data
+  async function fetchAllPaginatedData(table: string, select: string): Promise<any[]> {
+    let allData: any[] = [];
+    let hasMore = true;
+    let page = 0;
+    const pageSize = 1000;
+
+    while (hasMore) {
+      const { data: chunk, error } = await supabase
+        .from(table)
+        .select(select)
+        .range(page * pageSize, (page + 1) * pageSize - 1);
+        
+      if (error) throw error;
+      
+      allData = [...allData, ...chunk];
+      
+      if (chunk.length < pageSize) {
+        hasMore = false;
+      } else {
+        page++;
+      }
+    }
     
-  if (statusError) throw statusError;
+    return allData;
+  }
+
+  // 2. Project Pipeline Breakdown - fetch all status data
+  const statusData = await fetchAllPaginatedData('gujrera_projects_detailed_summary', 'projectprogress');
   
   const projectsByStatus: Record<string, number> = {
     'Active': activeProjects,
@@ -171,12 +245,8 @@ async function collectProjectSummaryData(
     'Unreported': unreportedProjects
   };
   
-  // Fetch data for project type distribution
-  const { data: typeData, error: typeError } = await supabase
-    .from('gujrera_projects_detailed_summary')
-    .select('projecttype');
-    
-  if (typeError) throw typeError;
+  // Fetch all project type data
+  const typeData = await fetchAllPaginatedData('gujrera_projects_detailed_summary', 'projecttype');
   
   const projectsByType: Record<string, number> = {};
   typeData.forEach((item: any) => {
@@ -184,12 +254,8 @@ async function collectProjectSummaryData(
     projectsByType[type] = (projectsByType[type] || 0) + 1;
   });
   
-  // Fetch data for promoter type distribution
-  const { data: promoterData, error: promoterError } = await supabase
-    .from('gujrera_projects_detailed_summary')
-    .select('promotertype');
-    
-  if (promoterError) throw promoterError;
+  // Fetch all promoter type data
+  const promoterData = await fetchAllPaginatedData('gujrera_projects_detailed_summary', 'promotertype');
   
   const projectsByPromoterType: Record<string, number> = {};
   promoterData.forEach((item: any) => {
@@ -197,27 +263,24 @@ async function collectProjectSummaryData(
     projectsByPromoterType[promoterType] = (projectsByPromoterType[promoterType] || 0) + 1;
   });
   
-  // 3. Financial Health Metrics
-  // Get land and development costs
-  const { data: financialData, error: financialError } = await supabase
-    .from('gujrera_projects_detailed_summary')
-    .select(`
-      subtotaloflandcosta,
-      subtotofdevelopcosta,
-      paymentoftaxesa,
-      paymentoftaxesb,
-      amountofpremiumpayablea,
-      amountofpremiumpayableb,
-      interestpayabletofinancea,
-      interestpayabletofinanceb,
-      amtwithdrawntilldateofthiscerti,
-      amttobedepositedindesigacc,
-      totalcostincurredandpaid,
-      totalestimatedcostoftherealestateproject
-    `);
-    
-  if (financialError) throw financialError;
+  console.log(`Processed ${typeData.length} project types and ${promoterData.length} promoter types`);
   
+  // 3. Financial Health Metrics - fetch all financial data
+  const financialData = await fetchAllPaginatedData('gujrera_projects_detailed_summary', `
+    subtotaloflandcosta,
+    subtotofdevelopcosta,
+    paymentoftaxesa,
+    paymentoftaxesb,
+    amountofpremiumpayablea,
+    amountofpremiumpayableb,
+    interestpayabletofinancea,
+    interestpayabletofinanceb,
+    amtwithdrawntilldateofthiscerti,
+    amttobedepositedindesigacc,
+    totalcostincurredandpaid,
+    totalestimatedcostoftherealestateproject
+  `);
+    
   // Calculate financial health metrics
   let totalLandCost = 0;
   let totalDevCost = 0;
@@ -255,6 +318,8 @@ async function collectProjectSummaryData(
   
   const avgCostVariance = costVarianceCount > 0 ? (costVarianceSum / costVarianceCount) * 100 : 0;
   
+  console.log(`Processed ${financialData.length} financial records`);
+  
   // Generate YoY changes for financial metrics
   const financialsYoY = {
     yoyLandCost: simulateYoyChange(totalLandCost, 5, 20),
@@ -262,18 +327,15 @@ async function collectProjectSummaryData(
     yoyCostVariance: simulateYoyChange(avgCostVariance, -5, 10)
   };
   
-  // 4. Sales & Booking Performance
-  // Get total units vs booked units
-  const { data: unitsData, error: unitsError } = await supabase
-    .from('gujrera_projects_detailed_summary')
-    .select('total_units, booked_flats, total_received_amount');
-    
-  if (unitsError) throw unitsError;
+  // 4. Sales & Booking Performance - fetch all units data
+  const unitsData = await fetchAllPaginatedData('gujrera_projects_detailed_summary', 'total_units, booked_flats, total_received_amount');
   
   const totalUnits = unitsData.reduce((sum, item) => sum + (item.total_units || 0), 0);
   const bookedUnits = unitsData.reduce((sum, item) => sum + (item.booked_flats || 0), 0);
   const totalRevenue = unitsData.reduce((sum, item) => sum + (item.total_received_amount || 0), 0);
   const revenuePerUnit = bookedUnits > 0 ? totalRevenue / bookedUnits : 0;
+  
+  console.log(`Processed ${unitsData.length} units records`);
   
   // Generate YoY changes for sales metrics
   const salesYoY = {
@@ -282,15 +344,8 @@ async function collectProjectSummaryData(
     yoyCollectionPercentage: simulateYoyChange(avgCollectionPercentage, -8, 8)
   };
   
-  // 5. Project Velocity & Schedule
-  // Calculate average project duration
-  const { data: durationData, error: durationError } = await supabase
-    .from('gujrera_projects_detailed_summary')
-    .select('startdate, completiondate, projectprogress')
-    .not('startdate', 'is', null)
-    .not('completiondate', 'is', null);
-    
-  if (durationError) throw durationError;
+  // 5. Project Velocity & Schedule - fetch duration data
+  const durationData = await fetchAllPaginatedData('gujrera_projects_detailed_summary', 'startdate, completiondate, projectprogress');
   
   let totalDurationDays = 0;
   let projectWithDatesCount = 0;
@@ -321,16 +376,10 @@ async function collectProjectSummaryData(
   const avgProjectDuration = projectWithDatesCount > 0 ? totalDurationDays / projectWithDatesCount : 0;
   const yoyAvgProjectDuration = simulateYoyChange(avgProjectDuration, -5, 15);
   
-  // Get upcoming completions (projects completing in next 6 months)
-  // This would require more data transformation, we'll leave it as a placeholder
+  console.log(`Processed ${durationData.length} duration records, with ${projectWithDatesCount} valid durations`);
   
-  // 6. Geographic Distribution
-  // Get projects by location (district)
-  const { data: locationData, error: locationError } = await supabase
-    .from('gujrera_projects_detailed_summary')
-    .select('distname, booking_percentage');
-  
-  if (locationError) throw locationError;
+  // 6. Geographic Distribution - fetch location data
+  const locationData = await fetchAllPaginatedData('gujrera_projects_detailed_summary', 'distname, booking_percentage');
   
   // Calculate projects by location and avg booking % by location
   const projectsByLocation: Record<string, number> = {};
@@ -351,6 +400,8 @@ async function collectProjectSummaryData(
       bookingByLocation[location].count++;
     }
   });
+  
+  console.log(`Processed ${locationData.length} location records with ${Object.keys(projectsByLocation).length} unique locations`);
   
   // Calculate average booking percentage by location
   const avgBookingByLocation: Record<string, number> = {};
@@ -374,13 +425,8 @@ async function collectProjectSummaryData(
       return acc;
     }, {});
   
-  // 7. Consultant & Promoter Insights
-  // Get top promoters by project count
-  const { data: promotersData, error: promotersError } = await supabase
-    .from('gujrera_projects_detailed_summary')
-    .select('promotername');
-    
-  if (promotersError) throw promotersError;
+  // 7. Consultant & Promoter Insights - fetch promoter data
+  const promotersData = await fetchAllPaginatedData('gujrera_projects_detailed_summary', 'promotername');
   
   // Count projects by promoter
   const projectsByPromoter: Record<string, number> = {};
@@ -388,6 +434,8 @@ async function collectProjectSummaryData(
     const promoter = item.promotername || 'Unknown';
     projectsByPromoter[promoter] = (projectsByPromoter[promoter] || 0) + 1;
   });
+  
+  console.log(`Processed ${promotersData.length} promoter records`);
   
   // Sort and get top 10 promoters
   const top10Promoters = Object.entries(projectsByPromoter)
@@ -399,11 +447,7 @@ async function collectProjectSummaryData(
     }, {});
   
   // Get average architect and engineer scores
-  const { data: scoresData, error: scoresError } = await supabase
-    .from('gujrera_projects_detailed_summary')
-    .select('archscore, enggscore');
-    
-  if (scoresError) throw scoresError;
+  const scoresData = await fetchAllPaginatedData('gujrera_projects_detailed_summary', 'archscore, enggscore');
   
   let totalArchScore = 0;
   let archScoreCount = 0;
@@ -423,6 +467,8 @@ async function collectProjectSummaryData(
   
   const avgArchScore = archScoreCount > 0 ? totalArchScore / archScoreCount : 0;
   const avgEngScore = engScoreCount > 0 ? totalEngScore / engScoreCount : 0;
+  
+  console.log(`Processed ${scoresData.length} score records (${archScoreCount} arch, ${engScoreCount} eng)`);
   
   // Generate YoY changes for consultant metrics
   const yoyAvgArchScore = simulateYoyChange(avgArchScore, -10, 10);

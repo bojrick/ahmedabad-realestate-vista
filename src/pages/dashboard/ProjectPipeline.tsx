@@ -47,7 +47,7 @@ const ProjectPipeline = () => {
           </CardContent>
         </Card>
         
-        {summary.projectsByPromoterType && (
+        {summary.projectsByPromoterType && Object.keys(summary.projectsByPromoterType).length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle>Projects by Promoter Type</CardTitle>

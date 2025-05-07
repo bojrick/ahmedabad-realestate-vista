@@ -1,3 +1,4 @@
+
 export interface ProjectLocation {
   latitude: number;
   longitude: number;
@@ -188,7 +189,7 @@ export interface ProjectSummary {
   // Project Pipeline
   projectsByStatus: Record<string, number>;
   projectsByType: Record<string, number>;
-  projectsByPromoterType?: Record<string, number>;
+  projectsByPromoterType: Record<string, number>;
   
   // Financial Health
   financials?: {
@@ -231,7 +232,7 @@ export interface ProjectSummary {
   yoyProjectsByLocation?: Record<string, number>; // percentage change by location
   
   // Consultant & Promoter Insights
-  topPromoters?: Record<string, number>;
+  topPromoters: Record<string, number>;
   avgArchScore?: number;
   avgEngScore?: number;
   yoyAvgArchScore?: number; // percentage point change
