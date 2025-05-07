@@ -1,6 +1,6 @@
 
 import React from "react";
-import { useProjectSummaryQuery } from "@/hooks/useProjectsQuery";
+import { useOptimizedProjectSummary } from "@/hooks/useOptimizedProjectSummary";
 import EnhancedDashboard from "@/components/EnhancedDashboard";
 
 const Index = () => {
@@ -9,7 +9,7 @@ const Index = () => {
     isLoading,
     isError,
     error
-  } = useProjectSummaryQuery();
+  } = useOptimizedProjectSummary();
   
   if (isError) {
     return <div className="min-h-screen flex items-center justify-center bg-gray-100">

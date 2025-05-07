@@ -386,7 +386,67 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      dashboard_financial_health: {
+        Row: {
+          total_dev_cost: number | null
+          total_interest_charges: number | null
+          total_land_cost: number | null
+          total_net_cash_flow: number | null
+          total_taxes_premiums: number | null
+        }
+        Relationships: []
+      }
+      dashboard_projects_by_location: {
+        Row: {
+          count: number | null
+          location: string | null
+        }
+        Relationships: []
+      }
+      dashboard_projects_by_promoter_type: {
+        Row: {
+          count: number | null
+          promotertype: string | null
+        }
+        Relationships: []
+      }
+      dashboard_projects_by_type: {
+        Row: {
+          count: number | null
+          projecttype: string | null
+        }
+        Relationships: []
+      }
+      dashboard_sales_booking_performance: {
+        Row: {
+          booked_units: number | null
+          revenue_per_unit: number | null
+          total_revenue: number | null
+          total_units: number | null
+        }
+        Relationships: []
+      }
+      dashboard_top10_promoters: {
+        Row: {
+          count: number | null
+          promotername: string | null
+        }
+        Relationships: []
+      }
+      dashboard_yearly_avg_unit_consideration: {
+        Row: {
+          avg_unit_consideration: number | null
+          year: number | null
+        }
+        Relationships: []
+      }
+      dashboard_yearly_projects_approved: {
+        Row: {
+          projects_approved: number | null
+          year: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_avg_booking_percentage: {
@@ -396,6 +456,29 @@ export type Database = {
       get_avg_project_progress: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      get_dashboard_project_summary: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          total_projects: number
+          active_projects: number
+          completed_projects: number
+          delayed_projects: number
+          unreported_projects: number
+          total_value: number
+          total_spend: number
+          avg_booking_percentage: number
+          avg_collection_percentage: number
+          avg_progress: number
+        }[]
+      }
+      get_market_overview_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_project_summary_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       get_total_area_of_land: {
         Args: Record<PropertyKey, never>
@@ -411,6 +494,10 @@ export type Database = {
       }
       get_total_received_amount: {
         Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      safe_to_numeric: {
+        Args: { v: string }
         Returns: number
       }
     }

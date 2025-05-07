@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useYearlyProjectData } from "@/hooks/useYearlyProjectData";
+import { useOptimizedYearlyData } from "@/hooks/useOptimizedYearlyData";
 import YearlyTimeSeriesChart from "@/components/charts/YearlyTimeSeriesChart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -23,7 +23,7 @@ const MarketAnalysis = () => {
     isLoading,
     filterOptions,
     setFilter
-  } = useYearlyProjectData();
+  } = useOptimizedYearlyData();
 
   const handleFilterChange = (filterType: string, value: string) => {
     setFilter(filterType as any, value);
