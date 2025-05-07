@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectSummary, getProjectStatusFromProgress } from "@/types/project";
@@ -187,6 +186,35 @@ export const useProjectSummaryQuery = () => {
 };
 
 /**
+ * Helper function to fetch paginated data from any table
+ */
+async function fetchAllPaginatedData(tableName: 'gujrera_projects_detailed_summary', select: string): Promise<any[]> {
+  let allData: any[] = [];
+  let hasMore = true;
+  let page = 0;
+  const pageSize = 1000;
+
+  while (hasMore) {
+    const { data: chunk, error } = await supabase
+      .from(tableName)
+      .select(select)
+      .range(page * pageSize, (page + 1) * pageSize - 1);
+      
+    if (error) throw error;
+    
+    allData = [...allData, ...chunk];
+    
+    if (chunk.length < pageSize) {
+      hasMore = false;
+    } else {
+      page++;
+    }
+  }
+  
+  return allData;
+}
+
+/**
  * Helper function to collect all project summary data
  */
 async function collectProjectSummaryData(
@@ -207,33 +235,6 @@ async function collectProjectSummaryData(
     const percentChange = Math.random() * (max - min) + min;
     return parseFloat(percentChange.toFixed(1));
   };
-
-  // Helper function to fetch paginated data
-  async function fetchAllPaginatedData(table: string, select: string): Promise<any[]> {
-    let allData: any[] = [];
-    let hasMore = true;
-    let page = 0;
-    const pageSize = 1000;
-
-    while (hasMore) {
-      const { data: chunk, error } = await supabase
-        .from(table)
-        .select(select)
-        .range(page * pageSize, (page + 1) * pageSize - 1);
-        
-      if (error) throw error;
-      
-      allData = [...allData, ...chunk];
-      
-      if (chunk.length < pageSize) {
-        hasMore = false;
-      } else {
-        page++;
-      }
-    }
-    
-    return allData;
-  }
 
   // 2. Project Pipeline Breakdown - fetch all status data
   const statusData = await fetchAllPaginatedData('gujrera_projects_detailed_summary', 'projectprogress');

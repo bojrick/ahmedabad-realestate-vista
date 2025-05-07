@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { ProjectData, ProjectSummary, ProjectLocation, getProjectStatusFromProgress } from "@/types/project";
 
@@ -220,6 +221,8 @@ export function calculateProjectsSummary(projects: ProjectData[]): ProjectSummar
       projectsByType: {},
       projectsByStatus: {},
       projectsByLocation: {},
+      projectsByPromoterType: {}, // Add missing property
+      topPromoters: {}, // Add missing property
       financialSummary: {
         totalValue: 0,
         receivedAmount: 0,
@@ -277,6 +280,29 @@ export function calculateProjectsSummary(projects: ProjectData[]): ProjectSummar
         break;
     }
   });
+
+  // Group by promoter type
+  const projectsByPromoterType: Record<string, number> = {};
+  projects.forEach(p => {
+    const promoterType = p.promoterType || 'Unknown';
+    projectsByPromoterType[promoterType] = (projectsByPromoterType[promoterType] || 0) + 1;
+  });
+  
+  // Create top promoters map
+  const promoterCounts: Record<string, number> = {};
+  projects.forEach(p => {
+    const promoter = p.promoter || 'Unknown';
+    promoterCounts[promoter] = (promoterCounts[promoter] || 0) + 1;
+  });
+  
+  // Get top 10 promoters
+  const topPromoters = Object.entries(promoterCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .reduce<Record<string, number>>((acc, [promoter, count]) => {
+      acc[promoter] = count;
+      return acc;
+    }, {});
   
   // Group by location - limit to top locations for performance
   const locationCounts: {location: string, count: number}[] = [];
@@ -315,6 +341,8 @@ export function calculateProjectsSummary(projects: ProjectData[]): ProjectSummar
     projectsByType,
     projectsByStatus,
     projectsByLocation,
+    projectsByPromoterType, // Add the missing property
+    topPromoters, // Add the missing property
     financialSummary: {
       totalValue,
       receivedAmount,
